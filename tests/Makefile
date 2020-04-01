@@ -3,13 +3,14 @@
 
 # check observers with M, C, G matrices
 test: test.cpp
-	g++ -Wall test.cpp -o test -lm 
+	g++ -Wall test.cpp -o test -lm
 	./test
 	gnuplot -p force.gnuplot
 
 # check observers with RNEA
-rnea: test_rnea.cpp
-	g++ -Wall test_rnea.cpp -o rnea -lm
+RNEA_SRC = test_rnea.cpp  ../src/robot_dynamics_rnea.cpp
+rnea: $(RNEA_SRC)
+	g++ -Wall $(RNEA_SRC) -o rnea -lm
 	./rnea
 	gnuplot -p force.gnuplot	
 
