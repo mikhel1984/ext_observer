@@ -15,7 +15,7 @@ SRC_TCP = bin/listener.o bin/robot.o bin/mfnc.o bin/minit.o bin/mterm.o \
       bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o 
 
 
-.PHONY: all test clear listen
+.PHONY: all clear listen
 
 # get information from csv file
 all: ${SRC}
