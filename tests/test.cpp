@@ -5,9 +5,9 @@
 //
 // Uncemment the desirable observer
 //
-#include "../src/momentum_observer.h" 
-//#include "../src/disturbance_observer.h"
-//#include "../src/sliding_mode_observer.h"
+#include "../lib/momentum_observer.h" 
+//#include "../lib/disturbance_observer.h"
+//#include "../lib/sliding_mode_observer.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 

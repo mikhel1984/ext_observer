@@ -6,9 +6,9 @@
 //
 // Uncomment the desirable observer
 //
-#include "../src/momentum_observer_rnea.h" 
-//#include "../src/disturbance_observer_rnea.h"
-//#include "../src/sliding_mode_observer_rnea.h"
+#include "../lib/momentum_observer_rnea.h" 
+//#include "../lib/disturbance_observer_rnea.h"
+//#include "../lib/sliding_mode_observer_rnea.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
