@@ -1,7 +1,7 @@
 #ifndef UR_ROBOT_H
 #define UR_ROBOT_H
 
-#include "../src/external_observer.h"
+#include "../lib/external_observer.h"
 
 #define NJ 6
 #define NPARAM 60

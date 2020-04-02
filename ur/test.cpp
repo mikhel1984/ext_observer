@@ -11,9 +11,9 @@
 //
 //   Uncomment desired observer
 //
-#include "../src/momentum_observer.h" 
-//#include "../src/disturbance_observer.h"
-//#include "../src/sliding_mode_observer.h"
+#include "../lib/momentum_observer.h" 
+//#include "../lib/disturbance_observer.h"
+//#include "../lib/sliding_mode_observer.h"
 
 // settings
 #define OUT_NAME "external.csv"
