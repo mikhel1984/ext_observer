@@ -28,6 +28,8 @@ public:
   void listen(void (*fn)(double,
                  Eigen::VectorXd&,Eigen::VectorXd&,Eigen::VectorXd&));
 
+  bool listen(double& tm,
+                 Eigen::VectorXd& vq,Eigen::VectorXd& vqd,Eigen::VectorXd& vi);
 private:
   double swap(double val);
 
@@ -77,36 +79,47 @@ void UrListener::listen(void (*fn)(double,
                  Eigen::VectorXd&,Eigen::VectorXd&,Eigen::VectorXd&))
 {
   Eigen::VectorXd vq(UR_JOINTS), vqd(UR_JOINTS), vi(UR_JOINTS);
-  
-  int bytes, i;
   unsigned int count = 0;
-  double *arr, tm;
+  double t = 0;
+
   while(count < COUNT_MAX) {
-    bytes = recv(sock, buf, TCP_BUF_SIZE, MSG_DONTWAIT);
-    if(bytes > 0) {
-      // time 
-      arr = (double*) (buf + CHAR_TIME);
-      tm = swap(*arr);
-      // angles
-      arr = (double*) (buf + CHAR_Q);
-      for(i = 0; i < UR_JOINTS; i++) vq(i) = swap(arr[i]);
-      // velocities
-      arr += UR_JOINTS;
-      for(i = 0; i < UR_JOINTS; i++) vqd(i) = swap(arr[i]);
-      // currents
-      arr += UR_JOINTS;
-      for(i = 0; i < UR_JOINTS; i++) vi(i) = swap(arr[i]);
-      // call function
-      if(fn) 
-        fn(tm,vq,vqd,vi);
+    if(listen(t,vq,vqd,vi)) {
+      if(fn)
+        fn(t,vq,vqd,vi);
       count = 0;
     } else {
-      usleep(SLEEP_USEC);
       ++count;
     }
   }
+
   if(count >= COUNT_MAX) 
     std::cout << "No data" << std::endl;
+}
+
+bool UrListener::listen(double& tm,
+                 Eigen::VectorXd& vq,Eigen::VectorXd& vqd,Eigen::VectorXd& vi)
+{
+  int bytes, i;
+  double *arr;
+  bytes = recv(sock, buf, TCP_BUF_SIZE, MSG_DONTWAIT);
+  if(bytes > 0) {
+    // time 
+    arr = (double*) (buf + CHAR_TIME);
+    tm = swap(*arr);
+    // angles
+    arr = (double*) (buf + CHAR_Q);
+    for(i = 0; i < UR_JOINTS; i++) vq(i) = swap(arr[i]);
+    // velocities
+    arr += UR_JOINTS;
+    for(i = 0; i < UR_JOINTS; i++) vqd(i) = swap(arr[i]);
+    // currents
+    arr += UR_JOINTS;
+    for(i = 0; i < UR_JOINTS; i++) vi(i) = swap(arr[i]);
+    return true;  
+  } else {
+    usleep(SLEEP_USEC);
+  }
+  return false;
 }
 
 double UrListener::swap(double val)
