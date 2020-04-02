@@ -1,0 +1,12 @@
+<launch>
+  <node pkg="ur_observer" type="ur_observer" name="ur_observer">
+    <!-- MO - momentum observer,
+         DIS - disturbance observer,
+         SM - sliding mode observer -->
+    <param name="ur_type" value="MO" />
+    <param name="ur_ip" value="127.0.0.1" />
+  </node>
+  <!--
+  <node pkg="rqt_plot" type="rqt_plot" name="rqt_plot"
+        args=" /ext/torque/tau1:tau2:tau3:tau4:tau5:tau6" />  -->
+</launch>
