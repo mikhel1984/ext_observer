@@ -1,9 +1,9 @@
-#include "ros/ros.h"
 // Generate "external" torques for the double link manipulator.
 // Use
 //   rqt_plot /ext/torque/tau1:tau2 
 // for visualization
 
+#include "ros/ros.h"
 #include "double_link_observer/ExtTorque2.h"
 
 #include "double_link.h"
