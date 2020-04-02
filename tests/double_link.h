@@ -1,7 +1,7 @@
 #ifndef DOUBLE_LINK_H
 #define DOUBLE_LINK_H
 
-#include "../src/external_observer.h" 
+#include "../lib/external_observer.h" 
 #include <cmath>
 
 class DoubleLink : public RobotDynamics {

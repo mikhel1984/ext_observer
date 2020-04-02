@@ -1,7 +1,7 @@
 #ifndef DOUBLE_LINK_RNEA_H
 #define DOUBLE_LINK_RNEA_H
 
-#include "../src/external_observer.h" 
+#include "../lib/external_observer.h" 
 #include <cmath>
 
 class DoubleLinkRnea : public RobotDynamicsRnea {

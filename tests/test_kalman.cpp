@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "../src/kalman_filter.h"
+#include "../lib/kalman_filter.h"
 
 #define RANDOM ((rand() % 1000)/1000.0)
 #define FNAME "estimation.csv"
