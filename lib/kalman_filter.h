@@ -8,7 +8,7 @@
 #define KALMAN_FILTER_H
 
 #include <eigen3/Eigen/Geometry>
-#include <iostream>
+//#include <iostream>
 
 /**
  * @brief Discrete Kalma filter implementation.
@@ -17,17 +17,17 @@ class KalmanFilter {
 public:
   /** 
    * @brief Object constructor.
-   * @param a ...
-   * @param b ...
-   * @param c ...
+   * @param a state transition matrix.
+   * @param b control input matrix.
+   * @param c observation matrix.
    */
   KalmanFilter(Eigen::MatrixXd& a, Eigen::MatrixXd& b, Eigen::MatrixXd& c);
   /**
    * @brief Update covariance matrices.
    * 
    * Defauls are unit matrices.
-   * @param q ...
-   * @param r ...
+   * @param q covariance of the process noise.
+   * @param r covariance of the observation noise.
    */
   void setCovariance(Eigen::MatrixXd& q, Eigen::MatrixXd& r);
   /** 
@@ -107,21 +107,21 @@ void KalmanFilter::setCovariance(Eigen::MatrixXd& q, Eigen::MatrixXd& r)
 void KalmanFilter::reset(Eigen::VectorXd& x0)
 {
   X = x0;
-  P = Eigen::MatrixXd::Zero(nx,nx);
+  P = Eigen::MatrixXd::Zero(nx,nx);  
 }
 
 // State estimation for constant time step
 Eigen::VectorXd KalmanFilter::step(Eigen::VectorXd& u, Eigen::VectorXd& y)
 {
   // predict 
-  X = A * X + B * u;                     // i | i-1
-  P = A * P * A.transpose() + Q;         // i | i-1
+  X = A * X + B * u;                       // i | i-1
+  P = A * P * A.transpose() + Q;           // i | i-1
   // update 
-  Y = C * P * C.transpose() + R;         // i
-  K = P * C.transpose() * Y.inverse();   // i
+  Y = C * (P * C.transpose()) + R;         // i
+  K = P * (C.transpose() * Y.inverse());   // i
 
-  X = X + K * (y - C * X);               // i | i
-  P = (I - K * C) * P;                   // i | i
+  X += K * (y - C * X);                    // i | i
+  P = (I - K * C) * P;                     // i | i
   
   return X;
 }
@@ -131,15 +131,16 @@ Eigen::VectorXd KalmanFilter::step(Eigen::VectorXd& u, Eigen::VectorXd& y, doubl
 {
   // find current A matrix
   At = I + dt*A;
-  // predict 
-  X = At * X + dt * B * u;               // i | i-1
-  P = At * P * At.transpose() + Q;       // i | i-1
-  // update 
-  Y = C * P * C.transpose() + R;         // i
-  K = P * C.transpose() * Y.inverse();   // i
 
-  X = X + K * (y - C * X);               // i | i
-  P = (I - K * C) * P;                   // i | i
+  // predict 
+  X = At * X + dt * (B * u);               // i | i-1
+  P = At * P * At.transpose() + Q;         // i | i-1
+  // update 
+  Y = C * (P * C.transpose()) + R;         // i
+  K = P * (C.transpose() * Y.inverse());   // i  
+  
+  X += K * (y - C * X);                    // i | i
+  P = (I - K * C) * P;                     // i | i
   
   return X;
 }
