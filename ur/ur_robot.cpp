@@ -37,9 +37,9 @@ double rgdLst[NPARAM] = {16.017661,-2.0048e-24,-4.2449e-22,16.017661,
 
 UrRobot::UrRobot()
        : RobotDynamics()
-       , M(Matrix(NJ,NJ))
-       , G(Vector(NJ))
+       , M(Matrix(NJ,NJ))       
        , C(Matrix(NJ,NJ))
+       , G(Vector(NJ))
        , F(Vector(NJ))
        , param(rgdLst)
        , fric(fricLst)

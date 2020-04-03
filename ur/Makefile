@@ -28,6 +28,7 @@ listen: ${SRC_TCP}
 # remove object files
 clear:
 	rm -f bin/*.o
+	rm -f external.csv
 
 # make object files
 bin/main.o: test.cpp

@@ -11,9 +11,10 @@
 //
 //   Uncomment desired observer
 //
-#include "../lib/momentum_observer.h" 
+//#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
 //#include "../lib/sliding_mode_observer.h"
+#include "../lib/disturbance_kalman_filter.h"
 
 // settings
 #define OUT_NAME "external.csv"
@@ -57,6 +58,16 @@ int main(int argc, char** argv)
   S2 << 10,10,10,10,10,10; // set 0 to exclude linear part
   for(int i = 0; i < N; i++) T2(i) = 2*sqrt(S2(i));
   SlidingModeObserver sm_observer(&robot,T1,S1,T2,S2);
+#endif
+#ifdef DISTURBANCE_KALMAN_FILTER_H
+  Matrix S = Matrix::Zero(N,N);
+  Matrix H = Matrix::Identity(N,N);
+  Matrix Q = Matrix::Identity(2*N,2*N);
+  for(int i = 0; i < N; i++) Q(i,i) = 0.002;
+  for(int i = N; i < 2*N; i++) Q(i,i) = 0.3;
+  Matrix R = Matrix::Identity(N,N);  
+  R *= 0.05;
+  DKalmanObserver dkm_observer(&robot,S,H,Q,R);
 #endif
   
   // save to file 
@@ -118,6 +129,9 @@ int main(int argc, char** argv)
 #ifdef SLIDING_MODE_OBSERVER_H
     ext = sm_observer.getExternalTorque(q,qd,tau,dt);
 #endif 
+#ifdef DISTURBANCE_KALMAN_FILTER_H
+    ext = dkm_observer.getExternalTorque(q,qd,tau,dt);
+#endif
 
     // save result 
     oFile <<  curr;
