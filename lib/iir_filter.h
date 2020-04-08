@@ -3,27 +3,31 @@
 
 #include <cmath>
 #include <eigen3/Eigen/Geometry>
+#include <iostream>
 
 class FilterIIR {
 public:
-  FilterIIR(double cutOffHz, double sampHz, int len) 
-  : N(len)
-  { omega = tan(3.1415926*cutOffHz / sampHz); }  // skip 2 / 2 
+  FilterIIR(double cutOffHz, double sampHz) 
+  { update(cutOffHz,sampHz); } 
 
-  virtual Eigen::VectorXd filt(Eigen::VectorXd& x);
+  virtual Eigen::VectorXd filt(Eigen::VectorXd& x) = 0;
 
   virtual void clear() = 0;
 
+  void update(double cutOffHz, double sampHz) 
+  { omega = tan(3.1415926*cutOffHz / sampHz); }  // skip 2 / 2 
+
+  double getOmega() { return omega; }
+
 protected:
   double omega;
-  double N;
 }; // FilterIIR
 
 // H(s) = w / (s + w)
 class FilterF1 : public FilterIIR {
 public:
-  FilterF1(double cutOffHz, double sampHz, int len)
-  : FilterIIR(cutOffHz, sampHz, len) 
+  FilterF1(double cutOffHz, double sampHz, int N)
+  : FilterIIR(cutOffHz, sampHz) 
   , x1(Eigen::VectorXd(N))
   , y1(Eigen::VectorXd(N))
   { }
@@ -31,6 +35,7 @@ public:
   Eigen::VectorXd filt(Eigen::VectorXd& x);
 
   void clear() { x1.setZero(); y1.setZero(); }
+
 
 private:
   Eigen::VectorXd x1, y1;
@@ -40,8 +45,8 @@ private:
 // H(s) = -w^2 / (s + w)
 class FilterF2 : public FilterIIR {
 public:
-  FilterF2(double cutOffHz, double sampHz, int len)
-  : FilterIIR(cutOffHz, sampHz, len) 
+  FilterF2(double cutOffHz, double sampHz, int N)
+  : FilterIIR(cutOffHz, sampHz) 
   , x1(Eigen::VectorXd(N))
   , y1(Eigen::VectorXd(N))
   { }
@@ -57,8 +62,8 @@ private:
 
 class FilterButterworth : public FilterIIR {
 public:
-  FilterButterworth(double cutOffHz, double sampHz, int len)
-  : FilterIIR(cutOffHz, sampHz, len) 
+  FilterButterworth(double cutOffHz, double sampHz, int N)
+  : FilterIIR(cutOffHz, sampHz) 
   , x1(Eigen::VectorXd(N))
   , x2(Eigen::VectorXd(N))
   , y1(Eigen::VectorXd(N))
@@ -78,6 +83,8 @@ Eigen::VectorXd FilterF1::filt(Eigen::VectorXd& x)
 {
   double k1 = (1-omega)/(1+omega);
   double k2 = omega / (1+omega);
+
+  //std::cout << omega << " " << k1 << " " << k2 << std::endl;
 
   y1 = k1*y1 + k2*(x + x1);
   x1 = x;
@@ -99,10 +106,10 @@ Eigen::VectorXd FilterF2::filt(Eigen::VectorXd& x)
 Eigen::VectorXd FilterButterworth::filt(Eigen::VectorXd& x)
 {
   double denom = 1 + sqrt(2)*omega + omega*omega;
-  double k1 = 2*(1-omega*omega);
-  double k2 = sqrt(2)*omega - 1 + omega*omega;
-  double k3 = omega*omega; // == k5
-  double k4 = 2*k3;
+  double k1 = (2*(1-omega*omega))/denom;
+  double k2 = (sqrt(2)*omega - 1 + omega*omega)/denom;
+  double k3 = omega*omega/denom; // == k5
+  double k4 = 2*k3/denom;
 
   res = k1*y1 + k2*y2 + k3*(x + x2) + k4*x1;
 
