@@ -14,7 +14,8 @@
 //#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
 //#include "../lib/sliding_mode_observer.h"
-#include "../lib/disturbance_kalman_filter.h"
+//#include "../lib/disturbance_kalman_filter.h"
+#include "../lib/filtered_dyn_observer.h"
 
 // settings
 #define OUT_NAME "external.csv"
@@ -68,6 +69,9 @@ int main(int argc, char** argv)
   Matrix R = Matrix::Identity(N,N);  
   R *= 0.05;
   DKalmanObserver dkm_observer(&robot,S,H,Q,R);
+#endif
+#ifdef FILTERED_DYNAMIC_OBSERVER_H
+  FDynObserver fd_observer(&robot, 8, 1/100.0);  // assume frequency is 100 Hz
 #endif
   
   // save to file 
@@ -131,6 +135,9 @@ int main(int argc, char** argv)
 #endif 
 #ifdef DISTURBANCE_KALMAN_FILTER_H
     ext = dkm_observer.getExternalTorque(q,qd,tau,dt);
+#endif
+#ifdef FILTERED_DYNAMIC_OBSERVER_H
+    ext = fd_observer.getExternalTorque(q,qd,tau,dt);
 #endif
 
     // save result 
