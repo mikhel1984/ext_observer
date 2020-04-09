@@ -7,20 +7,21 @@
 
 class FilterIIR {
 public:
-  FilterIIR(double cutOffHz, double sampHz) 
-  { update(cutOffHz,sampHz); } 
+  FilterIIR(double cutOffHz, double sampTime) 
+  { update(cutOffHz,sampTime); } 
 
   virtual Eigen::VectorXd filt(Eigen::VectorXd& x) = 0;
 
   virtual void clear() = 0;
 
-  void update(double cutOffHz, double sampHz) 
-  { omega = tan(3.1415926*cutOffHz / sampHz); }  // skip 2 / 2 
+  void update(double cutOffHz, double sampTime) 
+  { omega0 = 2*3.1415926*cutOffHz; f2 = 2/sampTime; 
+    omega = tan(omega0*sampTime*0.5); samp = sampTime; } 
 
-  double getOmega() { return omega; }
+  double getOmega() { return omega0; }
 
 protected:
-  double omega;
+  double omega0, f2, omega, samp;
 }; // FilterIIR
 
 // H(s) = w / (s + w)
@@ -35,7 +36,8 @@ public:
   Eigen::VectorXd filt(Eigen::VectorXd& x);
 
   void clear() { x1.setZero(); y1.setZero(); }
-
+  
+  void set(Eigen::VectorXd& x0) { x1 = x0; y1 = x0; }
 
 private:
   Eigen::VectorXd x1, y1;
@@ -55,11 +57,13 @@ public:
 
   void clear() { x1.setZero(); y1.setZero(); }
 
+  void set(Eigen::VectorXd& x0) { x1 = x0; y1 = -f2*omega*x0; }
 private:
   Eigen::VectorXd x1, y1;
 
 }; // FilterF2
 
+/*
 class FilterButterworth : public FilterIIR {
 public:
   FilterButterworth(double cutOffHz, double sampHz, int N)
@@ -78,31 +82,40 @@ public:
 private:
   Eigen::VectorXd x1, x2, y1, y2, res;
 }; // FilterButterworth
+*/
 
 Eigen::VectorXd FilterF1::filt(Eigen::VectorXd& x)
 {
-  double k1 = (1-omega)/(1+omega);
-  double k2 = omega / (1+omega);
-
-  //std::cout << omega << " " << k1 << " " << k2 << std::endl;
+  double k1 = (1-omega) / (1+omega);
+  double k2 = omega / (1 + omega);
 
   y1 = k1*y1 + k2*(x + x1);
   x1 = x;
-
+/*
+  double k1 = exp(-omega0*samp);
+  double k2 = omega0;
+  y1 = k1*y1 + k2*x;
+*/
   return y1;
 }
 
 Eigen::VectorXd FilterF2::filt(Eigen::VectorXd& x)
 {
   double k1 = (1-omega)/(1+omega);
-  double k2 = -omega*omega/(1+omega);
+  double k2 = -f2*omega*omega/(1+omega);
 
   y1 = k1*y1 + k2*(x + x1);
   x1 = x;
+/*
+  double k1 = exp(-omega0*samp);
+  double k2 = -omega0*omega0;
+  y1 = k1*y1 + k2*x;
+*/
 
   return y1;
 }
 
+/*
 Eigen::VectorXd FilterButterworth::filt(Eigen::VectorXd& x)
 {
   double denom = 1 + sqrt(2)*omega + omega*omega;
@@ -118,5 +131,6 @@ Eigen::VectorXd FilterButterworth::filt(Eigen::VectorXd& x)
 
   return res;
 }
+*/
 
-#endif
+#endif // IIR_FILTER_H

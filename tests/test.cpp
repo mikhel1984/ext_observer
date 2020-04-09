@@ -52,7 +52,7 @@ int main(int argc, char** argv)
   DKalmanObserver dkm_observer(&robot,S,H,Q,R);
 #endif
 #ifdef FILTERED_DYNAMIC_OBSERVER_H
-  FDynObserver fd_observer(&robot, 10, 1/TSTEP); 
+  FDynObserver fd_observer(&robot, 1, TSTEP); 
 #endif
   
   // save to file 
