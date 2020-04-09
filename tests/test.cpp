@@ -8,11 +8,13 @@
 //#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
 //#include "../lib/sliding_mode_observer.h"
-#include "../lib/disturbance_kalman_filter.h"
+//#include "../lib/disturbance_kalman_filter.h"
+#include "../lib/filtered_dyn_observer.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
 #define FNAME "force.csv"
+#define TSTEP 0.01
 
 // use it to emulate external torque
 #define SET_TORQUE
@@ -49,12 +51,15 @@ int main(int argc, char** argv)
   R *= 0.05;
   DKalmanObserver dkm_observer(&robot,S,H,Q,R);
 #endif
+#ifdef FILTERED_DYNAMIC_OBSERVER_H
+  FDynObserver fd_observer(&robot, 8, TSTEP); 
+#endif
   
   // save to file 
   std::ofstream file;
   file.open(FNAME); 
 
-  double dt = 0.01;
+  double dt = TSTEP;
   for(double t = 0; t < 3; t += dt) {
     double c1 = cos(OMEGA1*t), c2 = cos(OMEGA2*t);
     double s1 = sin(OMEGA1*t), s2 = sin(OMEGA2*t); 
@@ -84,6 +89,9 @@ int main(int argc, char** argv)
 #endif 
 #ifdef DISTURBANCE_KALMAN_FILTER_H
     ext = dkm_observer.getExternalTorque(q,qd,tau,dt);
+#endif
+#ifdef FILTERED_DYNAMIC_OBSERVER_H
+    ext = fd_observer.getExternalTorque(q,qd,tau,dt);
 #endif
     
     file << t << "," << ext(0) << "," << ext(1) << std::endl;
