@@ -16,55 +16,42 @@ public:
   void settings(double cutOffHz, double sampHz);
 
 private:
-  FilterF1 f1_1, f1_2;
+  FilterF1 f1;
   FilterF2 f2;
-  Vector p, res, p0;
-  double time;
+  Vector p, res;
 
 }; // FDynObserver
 
 FDynObserver::FDynObserver(RobotDynamics *rd, double cutOffHz, double sampHz)
   : ExternalObserver(rd)
-  , f1_1(FilterF1(cutOffHz,sampHz,jointNo))
-  , f1_2(FilterF1(cutOffHz,sampHz,jointNo))
+  , f1(FilterF1(cutOffHz,sampHz,jointNo))
   , f2(FilterF2(cutOffHz,sampHz,jointNo))
   , p(Vector(jointNo))
   , res(Vector(jointNo))
-  , p0(Vector(jointNo))
 {
 }
 
 void FDynObserver::settings(double cutOffHz, double sampHz)
 {
-  f1_1.update(cutOffHz,sampHz);
-  f1_2.update(cutOffHz,sampHz);
+  f1.update(cutOffHz,sampHz);
   f2.update(cutOffHz,sampHz);
 }
 
 Vector FDynObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
 {
   p = dyn->getM(q) * qd;
-  double w = f2.getOmega();
 
   if(isRun) {
-    time += dt;
-    res = f2.filt(p) + w * p ; //- w*exp(-w*time)*p0;
+    res = f2.filt(p) + f2.getOmega() * p ;
     p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q,qd).transpose() * qd;  // reuse 
     p -= tau;
-    res += f1_1.filt(p);
-    //res -= f1_2.filt(tau);
+    res += f1.filt(p);
   } else {
-    //f1_1.clear();
-    //f1_2.clear();
-    //f2.clear();
     f2.set(p);
     p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q,qd).transpose() * qd;  // reuse 
     p -= tau;
-    f1_1.set(p);
-    //f1_2.set(tau);
+    f1.set(p);
     res.setZero();
-    p0 = p;
-    time = 0;
     isRun = true;
   }
 

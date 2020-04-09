@@ -17,7 +17,7 @@
 #define TSTEP 0.01
 
 // use it to emulate external torque
-//#define SET_TORQUE
+#define SET_TORQUE
 
 int main(int argc, char** argv)
 {
@@ -52,7 +52,7 @@ int main(int argc, char** argv)
   DKalmanObserver dkm_observer(&robot,S,H,Q,R);
 #endif
 #ifdef FILTERED_DYNAMIC_OBSERVER_H
-  FDynObserver fd_observer(&robot, 1, TSTEP); 
+  FDynObserver fd_observer(&robot, 8, TSTEP); 
 #endif
   
   // save to file 
