@@ -75,7 +75,7 @@ int main(int argc, char** argv)
     sm_observer = new SlidingModeObserver(&robot,T1,S1,T2,S2);
     observer = sm_observer;
   } else if(s.compare(KF_OBSERVER) == 0) {
-    Matrix S = Matrix::Zero(UR_JONTS,UR_JOINTS);
+    Matrix S = Matrix::Zero(UR_JOINTS,UR_JOINTS);
     Matrix H = Matrix::Identity(UR_JOINTS,UR_JOINTS);
     Matrix Q = Matrix::Identity(2*UR_JOINTS,2*UR_JOINTS);
     for(int i = 0; i < UR_JOINTS; i++) Q(i,i) = 0.002;
@@ -92,6 +92,7 @@ int main(int argc, char** argv)
   }
 
   ROS_INFO("Observer type: %s", s.c_str());
+  ROS_INFO("Connect to: %s", addr.c_str());
 
   // Trajectory parameters
   Vector q(UR_JOINTS), qd(UR_JOINTS), ii(UR_JOINTS), ext(UR_JOINTS);
