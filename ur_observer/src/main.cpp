@@ -46,6 +46,7 @@ int main(int argc, char** argv)
   MomentumObserver    *m_observer = 0;
   DisturbanceObserver *d_observer = 0;
   SlidingModeObserver *sm_observer = 0;
+  
   ExternalObserver    *observer = 0;
 
   if(s == MO_OBSERVER) {
