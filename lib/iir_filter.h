@@ -24,13 +24,15 @@ public:
   { update(cutOff,sampTime); }
 
   Eigen::VectorXd filt(Eigen::VectorXd& x);
+  
+  Eigen::VectorXd filt(Eigen::VectorXd& x, double dt);
 
   void set(Eigen::VectorXd& x0) { x1 = x0; y1 = x0; }
 
   void update(double cutOff, double sampTime);
 private:
   Eigen::VectorXd x1, y1;
-  double k1, k2;
+  double k1, k2, cut;
 
 }; // FilterF1
 
@@ -44,6 +46,8 @@ public:
   { update(cutOff,sampTime); }
 
   Eigen::VectorXd filt(Eigen::VectorXd& x);
+  
+  Eigen::VectorXd filt(Eigen::VectorXd& x, double dt);
 
   void set(Eigen::VectorXd& x0) { x1 = x0; y1 = -f2*omega*x0; }
 
@@ -91,6 +95,16 @@ void FilterF1::update(double cutOff, double sampTime)
   double omega = tan(cutOff*sampTime*0.5);  
   k1 = (1-omega) / (1+omega);
   k2 = omega / (1 + omega);
+  cut = cutOff;
+}
+
+Eigen::VectorXd FilterF1::filt(Eigen::VectorXd& x, double dt)
+{
+  double omega = tan(cut*dt*0.5);  
+  k1 = (1-omega) / (1+omega);
+  k2 = omega / (1 + omega);
+  
+  return filt(x);
 }
 
 Eigen::VectorXd FilterF2::filt(Eigen::VectorXd& x)
@@ -109,6 +123,16 @@ void FilterF2::update(double cutOff, double sampTime)
   omega = tan(cutOff*sampTime*0.5);
   k1 = (1-omega)/(1+omega);
   k2 = -f2*omega*omega/(1+omega);
+}
+
+Eigen::VectorXd FilterF2::filt(Eigen::VectorXd& x, double dt)
+{
+  f2 = 2/dt; 
+  omega = tan(cut*dt*0.5);
+  k1 = (1-omega)/(1+omega);
+  k2 = -f2*omega*omega/(1+omega);
+  
+  return filt(x);
 }
 
 /*
