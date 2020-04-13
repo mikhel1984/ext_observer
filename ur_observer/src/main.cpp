@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     dkm_observer = new DKalmanObserver(&robot,S,H,Q,R);
     observer = dkm_observer;
   } else if(s.compare(FD_OBSERVER) == 0) {
-    fd_observer = new FDynObserver(&robot, 8, 1/200.0);
+    fd_observer = new FDynObserver(&robot, 8, 1/100.0);
     observer = fd_observer;
   } else {
     ROS_ERROR("Unknown parameter");
@@ -99,13 +99,17 @@ int main(int argc, char** argv)
   double tprev = -1, tm = 0;
 
   ros::Duration(0.5).sleep();  // wait a little to establish connection
-
+  int skip = 100;              // skip first messages
   while(ros::ok()) {
     
     if(connection.listen(tm,q,qd,ii)) {
+      if(skip) {
+        skip--;
+        continue;
+      }
       // find torques 
       for(int j = 0; j < UR_JOINTS; j++) ii(j) *= K_i[j];
-      if(tprev < 0) tprev = tm;
+      if(tprev < 0) tprev = tm-0.01;   // assume 100 Hz
       
       // find external torques
       ext = observer->getExternalTorque(q,qd,ii,tm-tprev);
