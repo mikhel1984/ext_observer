@@ -5,13 +5,16 @@
 //
 // Uncemment the desirable observer
 //
-#include "../lib/momentum_observer.h" 
+//#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
 //#include "../lib/sliding_mode_observer.h"
+//#include "../lib/disturbance_kalman_filter.h"
+#include "../lib/filtered_dyn_observer.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
 #define FNAME "force.csv"
+#define TSTEP 0.01
 
 // use it to emulate external torque
 #define SET_TORQUE
@@ -39,12 +42,24 @@ int main(int argc, char** argv)
   T2(0) = 2*sqrt(S2(0)); T2(1) = 2*sqrt(S2(1));
   SlidingModeObserver sm_observer(&robot,T1,S1,T2,S2);
 #endif
+#ifdef DISTURBANCE_KALMAN_FILTER_H
+  Matrix S = Matrix::Zero(2,2);
+  Matrix H = Matrix::Identity(2,2);
+  Matrix Q = Matrix::Identity(4,4);
+  Matrix R = Matrix::Identity(2,2);
+  Q(0,0) = 0.002; Q(1,1) = 0.002; Q(2,2) = 0.3; Q(3,3) = 0.3;
+  R *= 0.05;
+  DKalmanObserver dkm_observer(&robot,S,H,Q,R);
+#endif
+#ifdef FILTERED_DYNAMIC_OBSERVER_H
+  FDynObserver fd_observer(&robot, 8, TSTEP); 
+#endif
   
   // save to file 
   std::ofstream file;
   file.open(FNAME); 
 
-  double dt = 0.01;
+  double dt = TSTEP;
   for(double t = 0; t < 3; t += dt) {
     double c1 = cos(OMEGA1*t), c2 = cos(OMEGA2*t);
     double s1 = sin(OMEGA1*t), s2 = sin(OMEGA2*t); 
@@ -57,8 +72,8 @@ int main(int argc, char** argv)
     tau = robot.getM(q)*q2d + robot.getC(q,qd)*qd + robot.getG(q); 
 #ifdef SET_TORQUE    
     if(t > 1 && t < 2) {
-      tau(0) += 0.5;
-      tau(1) += 0.5;
+      tau(0) -= 0.5;
+      tau(1) -= 0.5;
     }
 #endif // SET_TORQUE
     // estimate torque and save 
@@ -72,6 +87,12 @@ int main(int argc, char** argv)
 #ifdef SLIDING_MODE_OBSERVER_H
     ext = sm_observer.getExternalTorque(q,qd,tau,dt);
 #endif 
+#ifdef DISTURBANCE_KALMAN_FILTER_H
+    ext = dkm_observer.getExternalTorque(q,qd,tau,dt);
+#endif
+#ifdef FILTERED_DYNAMIC_OBSERVER_H
+    ext = fd_observer.getExternalTorque(q,qd,tau,dt);
+#endif
     
     file << t << "," << ext(0) << "," << ext(1) << std::endl;
   }

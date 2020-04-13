@@ -14,7 +14,10 @@
 #define BIG 50   /**< Map tanh to sign. */
 
 /**
- * @brief Sliding mode observer from ...
+ * @brief Sliding mode observer from Garofalo et. al.
+ *
+ * "Sliding mode momentum observers for estimation of external torques 
+ *  and joint acceleration", 2019
  */
 class SlidingModeObserver : public ExternalObserver {
 public:
