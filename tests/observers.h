@@ -3,6 +3,7 @@
 
 #define ERR_WRONG_INDEX -1
 #define ERR_NO_SLOTS    -2
+#define ERR_WRONG_TYPE  -3
 
 // If index -1, return id of the new observer, else update existant
 

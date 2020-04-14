@@ -98,6 +98,8 @@ int configMomentumObserver(int ind, double *k)
   }
   // update state
   ptr = (MomentumObserver*) observer[ind];
+  if(ptr->type() != ID_MomentumObserver)
+    return ERR_WRONG_TYPE;
   ptr->settings(vk);
 
   return ind; // ok
@@ -119,6 +121,8 @@ int configDisturbanceObserver(int ind, double sigma, double xeta, double beta)
   }
   // update state
   ptr = (DisturbanceObserver*) observer[ind];
+  if(ptr->type() != ID_DisturbanceObserver)
+    return ERR_WRONG_TYPE;  
   ptr->settings(sigma,xeta,beta);
 
   return ind; // ok
@@ -147,6 +151,8 @@ int configSlidingModeObserver(int ind, double *T1, double *S1, double *T2, doubl
   }
 
   ptr = (SlidingModeObserver*) observer[ind];
+  if(ptr->type() != ID_SlidingModeObserver)
+    return ERR_WRONG_TYPE;
   ptr->settings(vT1,vS1,vT2,vS2);
 
   return ind;
@@ -181,6 +187,8 @@ int configDistKalmanObserver(int ind, double *S, double *H, double *Q, double *R
   }
 
   ptr = (DKalmanObserver*) observer[ind];
+  if(ptr->type() != ID_DKalmanObserver)
+    return ERR_WRONG_TYPE;
   ptr->settings(mQ,mR);
 
   return ind;
@@ -201,6 +209,8 @@ int configFilterDynObserver(int ind, double cutOff, double dt)
   }
 
   ptr = (FDynObserver*) observer[ind];
+  if(ptr->type() != ID_FDynObserver)
+    return ERR_WRONG_TYPE;
   ptr->settings(cutOff,dt);
 
   return ind;
