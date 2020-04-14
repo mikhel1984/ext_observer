@@ -1,5 +1,5 @@
 
-.PHONY: test kalman rnea
+.PHONY: test kalman rnea dyn
 
 # check observers with M, C, G matrices
 test: test.cpp
@@ -8,7 +8,7 @@ test: test.cpp
 	gnuplot -p force.gnuplot
 
 # check observers with RNEA
-RNEA_SRC = test_rnea.cpp  ../src/robot_dynamics_rnea.cpp
+RNEA_SRC = test_rnea.cpp  ../lib/robot_dynamics_rnea.cpp
 rnea: $(RNEA_SRC)
 	g++ -Wall $(RNEA_SRC) -o rnea -lm
 	./rnea
@@ -20,3 +20,5 @@ kalman: test_kalman.cpp
 	./kalman
 	gnuplot -p kalman.gnuplot	
 	
+#dyn: try_dyn.cpp
+#	g++ -shared -o libtrydin.so -fPIC try_dyn.cpp

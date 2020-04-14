@@ -10,6 +10,8 @@
 
 #include "external_observer.h"
 
+#define ID_MomentumObserverRnea 25
+
 /**
  * @brief Momentum observer from De Luca et al. 
  *
@@ -50,7 +52,7 @@ private:
 
 // Initialization
 MomentumObserverRnea::MomentumObserverRnea(RobotDynamicsRnea *rd, Vector& k) 
-  : ExternalObserverRnea(rd)
+  : ExternalObserverRnea(rd,ID_MomentumObserverRnea)
   , sum(Vector(jointNo))
   , r(Vector(jointNo))
   , zero(Vector::Zero(jointNo))

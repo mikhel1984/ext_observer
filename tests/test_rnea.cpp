@@ -6,9 +6,9 @@
 //
 // Uncomment the desirable observer
 //
-#include "../lib/momentum_observer_rnea.h" 
+//#include "../lib/momentum_observer_rnea.h" 
 //#include "../lib/disturbance_observer_rnea.h"
-//#include "../lib/sliding_mode_observer_rnea.h"
+#include "../lib/sliding_mode_observer_rnea.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
@@ -55,11 +55,11 @@ int main(int argc, char** argv)
     q2d(0) = -OMEGA1*OMEGA1*s1; q2d(1) = -OMEGA2*OMEGA2*s2;
     
     // torque 
-    tau = robot.rnea(q,qd,q2d,9.81); 
+    tau = robot.rnea(q,qd,q2d,GRAVITY); 
 #ifdef SET_TORQUE    
     if(t > 1 && t < 2) {
-      tau(0) += 0.5;
-      tau(1) += 0.5;
+      tau(0) -= 0.5;
+      tau(1) -= 0.5;
     }
 #endif // SET_TORQUE
     // estimate torque and save 

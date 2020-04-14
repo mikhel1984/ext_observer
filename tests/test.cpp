@@ -5,11 +5,11 @@
 //
 // Uncemment the desirable observer
 //
-//#include "../lib/momentum_observer.h" 
+#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
 //#include "../lib/sliding_mode_observer.h"
 //#include "../lib/disturbance_kalman_filter.h"
-#include "../lib/filtered_dyn_observer.h"
+//#include "../lib/filtered_dyn_observer.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 

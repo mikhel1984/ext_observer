@@ -11,6 +11,8 @@
 
 #include "external_observer.h"
 
+#define ID_SlidingModeObserver 3
+
 #define BIG 50   /**< Map tanh to sign. */
 
 /**
@@ -59,7 +61,7 @@ private:
 // Initialization
 SlidingModeObserver::SlidingModeObserver(RobotDynamics* rd,
                                 Vector& t1, Vector& s1, Vector& t2, Vector& s2)
-  : ExternalObserver(rd)
+  : ExternalObserver(rd,ID_SlidingModeObserver)
   , sigma(Vector(jointNo))
   , p_hat(Vector(jointNo))
   , p(Vector(jointNo))
@@ -68,7 +70,7 @@ SlidingModeObserver::SlidingModeObserver(RobotDynamics* rd,
   , torque(Vector(jointNo))
   , dsigma(Vector(jointNo))
   , T1(Vector(jointNo)), S1(Vector(jointNo))
-  , T2(Vector(jointNo)), S2(Vector(jointNo))
+  , T2(Vector(jointNo)), S2(Vector(jointNo))  
 {
   settings(t1,s1,t2,s2);
 }

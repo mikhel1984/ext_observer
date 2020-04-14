@@ -11,6 +11,8 @@
 #include "external_observer.h"
 #include "kalman_filter.h"
 
+#define ID_DKalmanObserver 1
+
 //#include <iostream>
 
 /**
@@ -59,12 +61,12 @@ private:
 
 // Initialization
 DKalmanObserver::DKalmanObserver(RobotDynamics* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r)
-  : ExternalObserver(rd)
+  : ExternalObserver(rd,ID_DKalmanObserver)
   , H(h)
   , X(Vector(2*jointNo))
   , u(Vector(jointNo))
   , p(Vector(jointNo))
-  , filter(0)
+  , filter(0)  
 {
   // prepare matrices
   Matrix A(2*jointNo,2*jointNo), B(2*jointNo,jointNo), C(jointNo,2*jointNo); 

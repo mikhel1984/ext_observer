@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#define ID_FDynObserver 2
+
 class FDynObserver : public ExternalObserver {
 public:
   FDynObserver(RobotDynamics *rd, double cutOffHz, double sampHz);
@@ -23,7 +25,7 @@ private:
 }; // FDynObserver
 
 FDynObserver::FDynObserver(RobotDynamics *rd, double cutOffHz, double sampHz)
-  : ExternalObserver(rd)
+  : ExternalObserver(rd,ID_FDynObserver)
   , f1(FilterF1(cutOffHz,sampHz,jointNo))
   , f2(FilterF2(cutOffHz,sampHz,jointNo))
   , p(Vector(jointNo))

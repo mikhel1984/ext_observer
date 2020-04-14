@@ -10,6 +10,8 @@
 
 #include "external_observer.h"
 
+#define ID_DisturbanceObserver 4
+
 /**
  * @brief Disturbance observer from Mohammadi et. al.
  */
@@ -50,7 +52,7 @@ private:
 
 // Initialization
 DisturbanceObserver::DisturbanceObserver(RobotDynamics *rd, double sigma, double xeta, double beta)
-  : ExternalObserver(rd)
+  : ExternalObserver(rd,ID_DisturbanceObserver)
   , Y(Matrix(jointNo,jointNo))
   , L(Matrix(jointNo,jointNo))
   , I(Matrix::Identity(jointNo,jointNo))
