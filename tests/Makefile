@@ -19,6 +19,7 @@ kalman: test_kalman.cpp
 	g++ -Wall test_kalman.cpp -o kalman -lm
 	./kalman
 	gnuplot -p kalman.gnuplot	
-	
-#dyn: try_dyn.cpp
-#	g++ -shared -o libtrydin.so -fPIC try_dyn.cpp
+
+# build dynamic library
+dyn: observers.cpp
+	g++ -shared -o libobservers.so -fPIC observers.cpp
