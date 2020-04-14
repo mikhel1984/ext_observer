@@ -5,14 +5,10 @@
 #include "../lib/disturbance_kalman_filter.h"
 #include "../lib/filtered_dyn_observer.h"
 
+#include "observers.h"
+
 #define ARRAY_LEN 20
 #define JOINT_NO 6
-#define ADD_NEW -1
-
-#define ERR_WRONG_INDEX -1
-#define ERR_NO_SLOTS    -2
-#define ERR_WRONG_TYPE  -3
-
 
 // robot dynamics
 static UrRobot robot;
@@ -167,16 +163,16 @@ int configDistKalmanObserver(int ind, double *S, double *H, double *Q, double *R
   DKalmanObserver* ptr;
   Matrix mS(JOINT_NO,JOINT_NO), mH(JOINT_NO,JOINT_NO), mQ(2*JOINT_NO,2*JOINT_NO), mR(JOINT_NO,JOINT_NO);
   int k = 0;
-  for(int r = 0; r < JOINT_NO; r++) {
-    for(int c = 0; c < JOINT_NO; c++,k++) {
+  for(int c = 0; c < JOINT_NO; c++) {
+    for(int r = 0; r < JOINT_NO; r++,k++) {
       mS(r,c) = S[k];
       mH(r,c) = H[k];
       mR(r,c) = R[k];
     }
   }
   k = 0;
-  for(int r = 0; r < 2*JOINT_NO; r++) {
-    for(int c = 0; c < 2*JOINT_NO; c++,k++) 
+  for(int c = 0; c < 2*JOINT_NO; c++) {
+    for(int r = 0; r < 2*JOINT_NO; r++,k++) 
       mQ(r,c) = Q[k];
   }
 
