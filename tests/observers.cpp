@@ -9,7 +9,6 @@
 
 #define ARRAY_LEN 20
 #define JOINT_NO 2
-#define ADD_NEW -1
 
 // robot dynamics
 static DoubleLink robot;

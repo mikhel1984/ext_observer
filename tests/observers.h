@@ -5,7 +5,12 @@
 #define ERR_NO_SLOTS    -2
 #define ERR_WRONG_TYPE  -3
 
+#define ADD_NEW -1
 // If index -1, return id of the new observer, else update existant
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int configMomentumObserver(int index, double k[2]);
 
@@ -25,6 +30,10 @@ void reset(int index);
 
 // clear memory
 void freeAll();
+
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif // OBSERVERS_DYN_H
