@@ -12,6 +12,7 @@
 #include "external_observer.h"
 
 #define BIGR 50   /**< Map tanh to sign. */
+#define ID_SlidingModeObserverRnea 23
 
 /**
  * @brief Sliding mode observer from ...
@@ -58,7 +59,7 @@ private:
 // Initialization
 SlidingModeObserverRnea::SlidingModeObserverRnea(RobotDynamicsRnea* rd,
                                 Vector& t1, Vector& s1, Vector& t2, Vector& s2)
-  : ExternalObserverRnea(rd)
+  : ExternalObserverRnea(rd,ID_SlidingModeObserverRnea)
   , sigma(Vector(jointNo))
   , p_hat(Vector(jointNo))
   , p(Vector(jointNo))

@@ -122,21 +122,15 @@ protected:
   
 }; // RobotDynamicsRnea
 
-/** 
- * @brief External torque observer.
- *
- * Work with matrices M, C ang G.
- */
-class ExternalObserver {
+class ExternalObserverBase {
 public:
   /**
-   * @brief Object constructor. 
-   * @param rd pointer to the robot interface.
+   * @brief Object constructor.
    */
-  ExternalObserver(RobotDynamics *rd)
-  : dyn(rd) 
-  , isRun(false)
-  { jointNo = rd->jointNo(); }
+  ExternalObserverBase()
+  : jointNo(0)
+  , objType(-1)
+  , isRun(false) {}  
   /**
    * @brief Estimate external torques.
    * 
@@ -152,11 +146,36 @@ public:
    * @brief Reset observer state.
    */ 
   void reset() { isRun = false; }
+  /**
+   * @brief Get observer type.
+   */
+  int type() { return objType; }  
+
+protected:
+  int jointNo;           /**< Number of joints. */
+  int objType;           /**< Observer type. */
+  bool isRun;            /**< First call check. */
+
+}; // ExternalObserverBase
+
+/** 
+ * @brief External torque observer.
+ *
+ * Work with matrices M, C ang G.
+ */
+class ExternalObserver : public ExternalObserverBase {
+public:
+  /**
+   * @brief Object constructor. 
+   * @param rd pointer to the robot interface.
+   */
+  ExternalObserver(RobotDynamics *rd, int type)
+  : ExternalObserverBase()
+  , dyn(rd) 
+  { jointNo = rd->jointNo(); objType = type; }  
 
 protected:
   RobotDynamics *dyn;    /**< Pointer to the robot interface. */
-  int jointNo;           /**< Number of joints. */
-  bool isRun;            /**< First call check. */
 
 }; // ExternalObserver
 
@@ -165,36 +184,19 @@ protected:
  * 
  * Work with RNEA algorithm.
  */
-class ExternalObserverRnea {
+class ExternalObserverRnea : public ExternalObserverBase {
 public:
   /**
    * @brief Object constructor.
    * @param rd pointer to the robot interface.
    */
-  ExternalObserverRnea(RobotDynamicsRnea *rd) 
-  : dyn(rd)
-  , isRun(false)
-  { jointNo = rd->jointNo(); }
-  /**
-   * @brief Estimate external torques.
-   * 
-   * The main method to use.
-   * @param q joint angle vector.
-   * @param qd joint velocity vector.
-   * @param tau joint torque vector.
-   * @param dt time step from the previous call.
-   * @return external torque vector.
-   */
-  virtual Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt) = 0;
-  /** 
-   * @brief Reset observer state.
-   */ 
-  void reset() { isRun = false; }  
+  ExternalObserverRnea(RobotDynamicsRnea *rd, int type) 
+  : ExternalObserverBase()
+  , dyn(rd)
+  { jointNo = rd->jointNo(); objType = type; }  
 
 protected:
-  RobotDynamicsRnea *dyn; /**< Pointer to the robot interface. */
-  int jointNo;            /**< Number of joints. */
-  bool isRun;             /**< First call check. */
+  RobotDynamicsRnea *dyn; /**< Pointer to the robot interface. */  
 
 }; // ExternalObserverRnea
 

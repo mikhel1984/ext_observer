@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#define ID_FDynObserver 2
+
 class FDynObserver : public ExternalObserver {
 public:
   FDynObserver(RobotDynamics *rd, double cutOffHz, double sampHz);
@@ -23,7 +25,7 @@ private:
 }; // FDynObserver
 
 FDynObserver::FDynObserver(RobotDynamics *rd, double cutOffHz, double sampHz)
-  : ExternalObserver(rd)
+  : ExternalObserver(rd,ID_FDynObserver)
   , f1(FilterF1(cutOffHz,sampHz,jointNo))
   , f2(FilterF2(cutOffHz,sampHz,jointNo))
   , p(Vector(jointNo))
@@ -42,10 +44,10 @@ Vector FDynObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, doubl
   p = dyn->getM(q) * qd;
 
   if(isRun) {
-    res = f2.filt(p) + f2.getOmega() * p ;
+    res = f2.filt(p,dt) + f2.getOmega() * p ;
     p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q,qd).transpose() * qd;  // reuse 
     p -= tau;
-    res += f1.filt(p);
+    res += f1.filt(p,dt);
   } else {
     f2.set(p);
     p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q,qd).transpose() * qd;  // reuse 

@@ -10,6 +10,8 @@
 
 #include "external_observer.h"
 
+#define ID_DisturbanceObserverRnea 24
+
 /**
  * @brief Disturbance observer from Mohammadi et. al.
  *
@@ -52,7 +54,7 @@ private:
 
 // Initialization
 DisturbanceObserverRnea::DisturbanceObserverRnea(RobotDynamicsRnea *rd, double sigma, double xeta, double beta)
-  : ExternalObserverRnea(rd)
+  : ExternalObserverRnea(rd,ID_DisturbanceObserverRnea)
   , Y(Matrix(jointNo,jointNo))
   , L(Matrix(jointNo,jointNo))
   , I(Matrix::Identity(jointNo,jointNo))
