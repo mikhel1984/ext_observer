@@ -5,11 +5,11 @@
 //
 // Uncemment the desirable observer
 //
-#include "../lib/momentum_observer.h" 
+//#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
 //#include "../lib/sliding_mode_observer.h"
 //#include "../lib/disturbance_kalman_filter.h"
-//#include "../lib/filtered_dyn_observer.h"
+#include "../lib/filtered_dyn_observer.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
@@ -21,7 +21,6 @@
 
 int main(int argc, char** argv)
 {
-  
   DoubleLink robot; 
   Vector q(2), qd(2), q2d(2), tau(2), ext(2);
 
