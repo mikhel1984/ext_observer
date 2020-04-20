@@ -32,6 +32,9 @@ void reset(int index);
 // clear memory
 void freeAll();
 
+// get expected joint torques
+void getRobotTorque(double tau[6], double q[6], double qd[6], double q2d[6]);
+
 #ifdef __cplusplus
 }
 #endif

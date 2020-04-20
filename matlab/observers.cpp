@@ -78,6 +78,21 @@ int getExternalTorque(int ind, double* ext, double *q, double *qd, double *tau, 
   return 0;
 }
 
+void getRobotTorque(double *tau, double *q, double *qd, double *q2d)
+{
+  Vector vq(JOINT_NO), vqd(JOINT_NO), vq2d(JOINT_NO), res(JOINT_NO);
+  for(int i = 0; i < JOINT_NO; i++) {
+    vq(i) = q[i];
+    vqd(i) = qd[i];
+    vq2d(i) = q2d[i];
+  }
+  
+  res = robot.getM(vq) * vq2d + robot.getC(vq,vqd) * vqd + robot.getG(vq) + robot.getFriction(vqd); 
+  
+  for(int i = 0; i < JOINT_NO; i++) 
+    tau[i] = res(i);
+}
+
 int configMomentumObserver(int ind, double *k)
 {
   // prepare
