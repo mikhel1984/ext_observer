@@ -23,6 +23,8 @@ int configDistKalmanObserver(int index, double S[6*6], double H[6*6], double Q[1
 
 int configFilterDynObserver(int index, double cutOff, double dt);
 
+int configFilterRangeObserver(int ind, double cutOff, double dt, double k);
+
 // Get external torque estimation
 int getExternalTorque(int index, double ext[6], double q[6], double qd[6], double tau[6], double dt); 
 

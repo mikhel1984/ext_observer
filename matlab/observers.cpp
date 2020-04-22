@@ -4,10 +4,11 @@
 #include "../lib/sliding_mode_observer.h"
 #include "../lib/disturbance_kalman_filter.h"
 #include "../lib/filtered_dyn_observer.h"
+#include "../lib/filtered_range_observer.h"
 
 #include "observers.h"
 
-#define ARRAY_LEN 20
+#define ARRAY_LEN 30
 #define JOINT_NO 6
 
 // robot dynamics
@@ -53,6 +54,7 @@ void freeAll()
       delete fd;
       break;
     }
+    observer[i] = 0;
   }
   _nextIndex = 0;
 }
@@ -229,5 +231,26 @@ int configFilterDynObserver(int ind, double cutOff, double dt)
     return ERR_WRONG_TYPE;
   ptr->settings(cutOff,dt);
 
+  return ind;
+}
+
+int configFilterRangeObserver(int ind, double cutOff, double dt, double k)
+{
+  FRangeObserver* ptr;
+  
+  if(ind == ADD_NEW) {
+    if(_nextIndex == ARRAY_LEN) return ERR_NO_SLOTS; 
+    ptr = new FRangeObserver(&robot,cutOff,dt,k);
+    observer[_nextIndex] = ptr;
+    return _nextIndex++;
+  } else if(ind < ADD_NEW || ind >= ARRAY_LEN) {
+    return ERR_WRONG_INDEX;
+  }
+  
+  ptr = (FRangeObserver*) observer[ind];
+  if(ptr->type() != ID_FRangeObserver)
+    return ERR_WRONG_TYPE;
+  ptr->settings(cutOff,dt,k);
+  
   return ind;
 }

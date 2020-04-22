@@ -1,3 +1,4 @@
+clear all; close all
 % get library
 if not(libisloaded('observers'))
     loadlibrary('observers.so','observers.h')
@@ -111,6 +112,30 @@ for i = 2:size(cur,1)
 end
 
 plot(tm,ext_df);
+figure;
+
+% ===== Filtered Range ===================
+
+% cinfiguration 
+%cutOff = 8;  % rad/s
+%timeStep = 0.01;  % s
+delta = 0.1;
+
+% get ID
+id_dr1 = calllib('observers','configFilterRangeObserver',-1,cutOff,timeStep, delta);
+id_dr2 = calllib('observers','configFilterRangeObserver',-1,cutOff,timeStep,-delta);
+
+ext_up = zeros(size(cur));
+ext_low = zeros(size(cur));
+for i = 2:size(cur,1)
+    calllib('observers','getExternalTorque',id_dr1,res,q(i,:),qd(i,:),K.*cur(i,:),tm(i)-tm(i-1));
+    ext_up(i,:) = res.Value(:);
+    calllib('observers','getExternalTorque',id_dr2,res,q(i,:),qd(i,:),K.*cur(i,:),tm(i)-tm(i-1));
+    ext_low(i,:) = res.Value(:);
+end
+
+plot(tm,[ext_up(:,3),ext_low(:,3),ext_df(:,3)]); 
+
 
 % =============== exit ===================
 
