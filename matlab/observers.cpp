@@ -54,6 +54,7 @@ void freeAll()
       break;
     }
   }
+  _nextIndex = 0;
 }
 
 int getExternalTorque(int ind, double* ext, double *q, double *qd, double *tau, double dt) 
