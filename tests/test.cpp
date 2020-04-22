@@ -5,11 +5,12 @@
 //
 // Uncemment the desirable observer
 //
-#include "../lib/momentum_observer.h" 
+//#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
 //#include "../lib/sliding_mode_observer.h"
 //#include "../lib/disturbance_kalman_filter.h"
 //#include "../lib/filtered_dyn_observer.h"
+#include "../lib/filtered_range_observer.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
@@ -21,7 +22,6 @@
 
 int main(int argc, char** argv)
 {
-  
   DoubleLink robot; 
   Vector q(2), qd(2), q2d(2), tau(2), ext(2);
 
@@ -54,6 +54,10 @@ int main(int argc, char** argv)
 #ifdef FILTERED_DYNAMIC_OBSERVER_H
   FDynObserver fd_observer(&robot, 8, TSTEP); 
 #endif
+#ifdef FILTERED_RANGE_OBSERVER_H
+  FRangeObserver fr_observer(&robot, 8, TSTEP, -0.1);
+#endif 
+
   
   // save to file 
   std::ofstream file;
@@ -92,6 +96,9 @@ int main(int argc, char** argv)
 #endif
 #ifdef FILTERED_DYNAMIC_OBSERVER_H
     ext = fd_observer.getExternalTorque(q,qd,tau,dt);
+#endif
+#ifdef FILTERED_RANGE_OBSERVER_H
+    ext = fr_observer.getExternalTorque(q,qd,tau,dt);
 #endif
     
     file << t << "," << ext(0) << "," << ext(1) << std::endl;
