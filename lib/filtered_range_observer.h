@@ -7,7 +7,7 @@
 
 #include <iostream>
 
-#define ID_FDynObserver 6
+#define ID_FRangeObserver 6
 
 class FRangeObserver : public ExternalObserver {
 public:
@@ -26,7 +26,7 @@ private:
 }; // FRangeObserver
 
 FRangeObserver::FRangeObserver(RobotDynamics *rd, double cutOffHz, double sampHz, double k)
-  : ExternalObserver(rd,ID_FDynObserver)
+  : ExternalObserver(rd,ID_FRangeObserver)
   , f1(FilterF1(cutOffHz,sampHz,jointNo))
   , f2(FilterF2(cutOffHz,sampHz,jointNo))
   , p(Vector(jointNo))
