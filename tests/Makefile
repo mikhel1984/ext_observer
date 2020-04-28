@@ -1,9 +1,10 @@
+INCDIR = -I /usr/include/eigen3
 
 .PHONY: test kalman rnea dyn
 
 # check observers with M, C, G matrices
 test: test.cpp
-	g++ -Wall test.cpp -o test -lm
+	g++ ${INCDIR} -Wall -I /usr/include/eigen3 test.cpp -o test -lm
 	./test
 	gnuplot -p force.gnuplot
 

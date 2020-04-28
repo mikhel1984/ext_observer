@@ -10,7 +10,8 @@
 //#include "../lib/sliding_mode_observer.h"
 //#include "../lib/disturbance_kalman_filter.h"
 //#include "../lib/filtered_dyn_observer.h"
-#include "../lib/filtered_range_observer.h"
+//#include "../lib/filtered_range_observer.h"
+#include "../lib/disturbance_kalman_filter_exp.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
@@ -50,6 +51,15 @@ int main(int argc, char** argv)
   Q(0,0) = 0.002; Q(1,1) = 0.002; Q(2,2) = 0.3; Q(3,3) = 0.3;
   R *= 0.05;
   DKalmanObserver dkm_observer(&robot,S,H,Q,R);
+#endif
+#ifdef DISTURBANCE_KALMAN_FILTER_EXP_H
+  Matrix S = Matrix::Zero(2,2);
+  Matrix H = Matrix::Identity(2,2);
+  Matrix Q = Matrix::Identity(4,4);
+  Matrix R = Matrix::Identity(2,2);
+  Q(0,0) = 0.2; Q(1,1) = 0.2; Q(2,2) = 30; Q(3,3) = 30;
+  R *= 0.0005;
+  DKalmanObserverExp dkme_observer(&robot,S,H,Q,R);
 #endif
 #ifdef FILTERED_DYNAMIC_OBSERVER_H
   FDynObserver fd_observer(&robot, 8, TSTEP); 
@@ -94,6 +104,9 @@ int main(int argc, char** argv)
 #ifdef DISTURBANCE_KALMAN_FILTER_H
     ext = dkm_observer.getExternalTorque(q,qd,tau,dt);
 #endif
+#ifdef DISTURBANCE_KALMAN_FILTER_EXP_H
+    ext = dkme_observer.getExternalTorque(q,qd,tau,dt);
+#endif 
 #ifdef FILTERED_DYNAMIC_OBSERVER_H
     ext = fd_observer.getExternalTorque(q,qd,tau,dt);
 #endif

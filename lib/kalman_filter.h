@@ -11,7 +11,7 @@
 //#include <iostream>
 
 /**
- * @brief Discrete Kalma filter implementation.
+ * @brief Discrete Kalman filter implementation.
  */
 class KalmanFilter {
 public:
