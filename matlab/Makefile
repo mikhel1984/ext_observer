@@ -1,5 +1,6 @@
 CC = g++
 CFLAGS = -Wall 
+INCDIR = -I /usr/include/eigen3
 
 URDIR = ../ur
 MDIR = ${URDIR}/M_mtrx_fcn/M_mtrx_fcn
@@ -24,7 +25,7 @@ clear:
 # make object files
 
 bin/observers.o: observers.cpp
-	${CC} ${CFLAGS} observers.cpp -c -fPIC -o $@
+	${CC} ${CFLAGS} ${INCDIR} observers.cpp -c -fPIC -o $@
 	
 bin/robot.o: ${URDIR}/ur_robot.cpp 
 	${CC} ${CFLAGS} ${URDIR}/ur_robot.cpp -c -fPIC -o $@

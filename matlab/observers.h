@@ -21,6 +21,8 @@ int configSlidingModeObserver(int index, double T1[6], double S1[6], double T2[6
 
 int configDistKalmanObserver(int index, double S[6*6], double H[6*6], double Q[12*12], double R[6*6]);
 
+int configDistKalmanObserverExp(int index, double S[6*6], double H[6*6], double Q[12*12], double R[6*6]);
+
 int configFilterDynObserver(int index, double cutOff, double dt);
 
 int configFilterRangeObserver(int ind, double cutOff, double dt, double k);

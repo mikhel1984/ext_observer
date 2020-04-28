@@ -5,6 +5,7 @@
 #include "../lib/disturbance_kalman_filter.h"
 #include "../lib/filtered_dyn_observer.h"
 #include "../lib/filtered_range_observer.h"
+#include "../lib/disturbance_kalman_filter_exp.h"
 
 #include "observers.h"
 
@@ -31,6 +32,8 @@ void freeAll()
   SlidingModeObserver *sm;
   DKalmanObserver *dk;
   FDynObserver *fd;
+  FRangeObserver *fr;
+  DKalmanObserverExp *dke;
   for(int i = 0; i < _nextIndex; i++) {
     switch (observer[i]->type() ) {
     case ID_MomentumObserver: 
@@ -52,6 +55,14 @@ void freeAll()
     case ID_FDynObserver:
       fd = (FDynObserver*) observer[i];
       delete fd;
+      break;
+    case ID_FRangeObserver:
+      fr = (FRangeObserver*) observer[i];
+      delete fr;
+      break;
+    case ID_DKalmanObserverExp:
+      dke = (DKalmanObserverExp*) observer[i];
+      delete dke;
       break;
     }
     observer[i] = 0;
@@ -211,6 +222,43 @@ int configDistKalmanObserver(int ind, double *S, double *H, double *Q, double *R
 
   return ind;
 }
+
+int configDistKalmanObserverExp(int ind, double *S, double *H, double *Q, double *R)
+{
+  DKalmanObserverExp* ptr;
+  Matrix mS(JOINT_NO,JOINT_NO), mH(JOINT_NO,JOINT_NO), mQ(2*JOINT_NO,2*JOINT_NO), mR(JOINT_NO,JOINT_NO);
+  int k = 0;
+  for(int c = 0; c < JOINT_NO; c++) {
+    for(int r = 0; r < JOINT_NO; r++,k++) {
+      mS(r,c) = S[k];
+      mH(r,c) = H[k];
+      mR(r,c) = R[k];
+    }
+  }
+  k = 0;
+  for(int c = 0; c < 2*JOINT_NO; c++) {
+    for(int r = 0; r < 2*JOINT_NO; r++,k++) 
+      mQ(r,c) = Q[k];
+  }
+
+  if(ind == ADD_NEW) {
+    if(_nextIndex == ARRAY_LEN) return ERR_NO_SLOTS;  // can't add new
+    // create new
+    ptr = new DKalmanObserverExp(&robot,mS,mH,mQ,mR);
+    observer[_nextIndex] = ptr;
+    return _nextIndex++;    // new element _nextIndex
+  } else if(ind < ADD_NEW || ind >= ARRAY_LEN) {
+    return ERR_WRONG_INDEX;
+  }
+
+  ptr = (DKalmanObserverExp*) observer[ind];
+  if(ptr->type() != ID_DKalmanObserverExp)
+    return ERR_WRONG_TYPE;
+  ptr->settings(mQ,mR);
+
+  return ind;
+}
+
 
 int configFilterDynObserver(int ind, double cutOff, double dt)
 {

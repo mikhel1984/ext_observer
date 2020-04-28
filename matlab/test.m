@@ -96,6 +96,39 @@ end
 plot(tm,ext_kf);
 figure;
 
+% ========= Kalman Filter Continous System Observer ===== 
+
+% configuration 
+S = zeros(6,6);
+H = eye(6,6);
+Q = blkdiag(0.2*eye(6,6), 30*eye(6,6));
+R = 0.0005*eye(6,6);
+
+% get ID
+id_kfe = calllib('observers','configDistKalmanObserverExp',-1,S,H,Q,R);
+
+ext_kfe = zeros(size(cur));
+mid = floor(size(cur,1));
+for i = 2:mid
+    calllib('observers','getExternalTorque',id_kfe,res,q(i,:),qd(i,:),K.*cur(i,:),tm(i)-tm(i-1));
+    ext_kfe(i,:) = res.Value(:); 
+end
+
+% update settings
+Q = blkdiag(0.3*eye(6,6), 20*eye(6,6));
+R = 0.001*eye(6,6);
+done = calllib('observers','configDistKalmanObserverExp',id_kfe,S,H,Q,R);   % S,H are not used, done should be equal to ext_kfe if OK 
+
+% continue
+for i = mid+1:size(cur,1)
+    calllib('observers','getExternalTorque',id_kfe,res,q(i,:),qd(i,:),K.*cur(i,:),tm(i)-tm(i-1));
+    ext_kfe(i,:) = res.Value(:);
+end
+
+plot(tm,ext_kfe);
+figure;
+
+
 % ====== Filtered Dynamics ==============
 
 % cinfiguration 
