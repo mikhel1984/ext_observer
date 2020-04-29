@@ -1,6 +1,8 @@
 
-#include <eigen3/unsupported/Eigen/MatrixFunctions>
+//#include <eigen3/unsupported/Eigen/MatrixFunctions>
 #include "kalman_filter_continous.h"
+
+#define EXP_TERMS 5
 
 // Initialization
 KalmanFilterContinous::KalmanFilterContinous(Eigen::MatrixXd& a, Eigen::MatrixXd& b, Eigen::MatrixXd& c)
@@ -83,16 +85,31 @@ Eigen::VectorXd KalmanFilterContinous::step(Eigen::VectorXd& u, Eigen::VectorXd&
 void KalmanFilterContinous::makeDiscrete(double dt)
 {
   // find At and Bt
-  ABd = (AB*dt).exp(); 
+  //ABd = (AB*dt).exp(); 
+  ABd = exponential(AB,dt);
   Ad = ABd.block(0,0,na,na);
   Bd = ABd.block(0,na,na,nb);
   // find Qt and Rt
   Rd = Rupd / dt;
-  AQd = (AQ*dt).exp();
+  //AQd = (AQ*dt).exp();
+  AQd = exponential(AQ,dt);
   Qd = AQd.block(na,na,na,na).transpose() * AQd.block(0,na,na,na);
 }
 
 void KalmanFilterContinous::updateR(Eigen::MatrixXd& m)
 {
   Rupd = m * R * m.transpose();
+}
+
+Eigen::MatrixXd KalmanFilterContinous::exponential(Eigen::MatrixXd& m, double dt)
+{
+  Eigen::MatrixXd res = Eigen::MatrixXd::Identity(m.rows(),m.cols());
+  Eigen::MatrixXd acc = res; 
+  
+  for(int i = 1; i <= EXP_TERMS; i++) {
+    acc *= m * (dt/i);
+    res += acc;
+  }
+
+  return res;  
 }

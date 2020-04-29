@@ -51,6 +51,8 @@ public:
   Eigen::VectorXd step(Eigen::VectorXd& u, Eigen::VectorXd& y, double dt);
   
   void updateR(Eigen::MatrixXd& m);
+  
+  Eigen::MatrixXd exponential(Eigen::MatrixXd& m, double dt);
 
 private:
   /**

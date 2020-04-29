@@ -49,7 +49,7 @@ public:
    * @param q covariance of the process noise.
    * @param r covariance of the observation noise.
    */
-  void settings(Matrix& q, Matrix& r);
+  void settings(Matrix& q, Matrix& r); 
 
 private:
   // disturbance observation
