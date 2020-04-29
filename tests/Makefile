@@ -3,8 +3,9 @@ INCDIR = -I /usr/include/eigen3
 .PHONY: test kalman rnea dyn
 
 # check observers with M, C, G matrices
-test: test.cpp
-	g++ ${INCDIR} -Wall -I /usr/include/eigen3 test.cpp -o test -lm
+TEST_SRC = test.cpp  ../lib/kalman_filter_continous.cpp
+test: ${TEST_SRC}
+	g++ -Wall ${INCDIR} ${TEST_SRC} -o test -lm
 	./test
 	gnuplot -p force.gnuplot
 

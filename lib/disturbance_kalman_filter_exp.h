@@ -53,7 +53,7 @@ public:
 
 private:
   // disturbance observation
-  Matrix H;
+  Matrix H, M;
   // state, input and momentum
   Vector X, u, p;
   // Kalman filter object
@@ -65,6 +65,7 @@ private:
 DKalmanObserverExp::DKalmanObserverExp(RobotDynamics* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r)
   : ExternalObserver(rd,ID_DKalmanObserverExp)
   , H(h)
+  , M(Matrix(jointNo,jointNo))
   , X(Vector(2*jointNo))
   , u(Vector(jointNo))
   , p(Vector(jointNo))
@@ -97,10 +98,13 @@ DKalmanObserverExp::~DKalmanObserverExp()
 // Torque estimation
 Vector DKalmanObserverExp::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
 {
-  p = dyn->getM(q) * qd;
+  M = dyn->getM(q);
+  p = M * qd;
   u = tau - dyn->getG(q) - dyn->getFriction(qd);
   u += dyn->getC(q,qd).transpose() * qd;
 
+  filter->updateR(M);
+  
   if(isRun) {
     X = filter->step(u,p,dt);
   } else {
