@@ -2,8 +2,8 @@
 #define IIR_FILTER_H
 
 #include <cmath>
-#include <eigen3/Eigen/Geometry>
-#include <iostream>
+#include <eigen3/Eigen/Dense>
+//#include <iostream>
 
 #define SQ2 1.4142135623731
 
