@@ -81,7 +81,7 @@ int main(int argc, char** argv)
 
   // read from file
   std::ifstream iFile(argv[1]);
-
+  
   std::vector<double> val;
   val.reserve(N);
 

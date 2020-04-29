@@ -59,7 +59,7 @@ int main(int argc, char** argv)
   oFile.precision(4);
 
   // read from file
-  std::ifstream iFile(argv[1]);
+  std::ifstream iFile("link4.csv");
 
   std::vector<double> val;
   val.reserve(N);
@@ -102,6 +102,8 @@ int main(int argc, char** argv)
       
   oFile.close();
   iFile.close();
+  
+  freeAll();
   
   return 0;
 }

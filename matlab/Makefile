@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall 
+CFLAGS = -Wall
 INCDIR = -I /usr/include/eigen3
 
 URDIR = ../ur
@@ -11,7 +11,7 @@ FDIR = ${URDIR}/F_vctr_fcn/F_vctr_fcn
 SRC = bin/observers.o bin/robot.o bin/mfnc.o bin/minit.o bin/mterm.o \
       bin/cfnc.o bin/cinit.o bin/cterm.o bin/gfnc.o bin/ginit.o \
       bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o bin/ckfilter.o
-
+      
 .PHONY: all clear test
 
 # get information from csv file
@@ -69,8 +69,15 @@ bin/finit.o: ${FDIR}_initialize.c
 bin/fterm.o: ${FDIR}.c
 	${CC} ${CFLAGS} ${FDIR}_terminate.c -c -fPIC -o $@
 	
-test: test_lib.cpp
-	${CC} ${CFLAGS} -Wl,-rpath=$(shell pwd) test_lib.cpp -o test_lib  -L. -l:observers.so
+#test: test_lib.cpp
+	#${CC} ${CFLAGS} -Wl,-rpath=$(shell pwd) test_lib.cpp -o test_lib  -L. -l:observers.so
+	
+test: bin/testit.o ${SRC}
+	${CC} ${CFLAGS} bin/testit.o ${SRC} -o test_all
+	
+bin/testit.o: test_lib.cpp
+	${CC} ${CFLAGS} test_lib.cpp -c -fPIC -o $@
+	
 
 
 
