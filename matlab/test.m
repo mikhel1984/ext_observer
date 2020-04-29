@@ -54,6 +54,7 @@ for i = 2:size(cur,1)
 end
 
 plot(tm,ext_dis);
+title("Disturbance observer");
 figure;
 
 % ======= Sliding Mode Observer ============
@@ -74,6 +75,7 @@ for i = 2:size(cur,1)
 end
 
 plot(tm,ext_sm);
+title("Sliding Mode Observer");
 figure;
 
 % ========= Kalman Filter Observer =======
@@ -94,6 +96,7 @@ for i = 2:size(cur,1)
 end
 
 plot(tm,ext_kf);
+title("Kalman Filter Observer");
 figure;
 
 % ========= Kalman Filter Continous System Observer ===== 
@@ -108,26 +111,15 @@ R = 0.0005*eye(6,6);
 id_kfe = calllib('observers','configDistKalmanObserverExp',-1,S,H,Q,R);
 
 ext_kfe = zeros(size(cur));
-mid = floor(size(cur,1));
-for i = 2:mid
+
+for i = 2:size(cur,1)
     calllib('observers','getExternalTorque',id_kfe,res,q(i,:),qd(i,:),K.*cur(i,:),tm(i)-tm(i-1));
     ext_kfe(i,:) = res.Value(:); 
 end
 
-% update settings
-Q = blkdiag(0.3*eye(6,6), 20*eye(6,6));
-R = 0.001*eye(6,6);
-done = calllib('observers','configDistKalmanObserverExp',id_kfe,S,H,Q,R);   % S,H are not used, done should be equal to ext_kfe if OK 
-
-% continue
-for i = mid+1:size(cur,1)
-    calllib('observers','getExternalTorque',id_kfe,res,q(i,:),qd(i,:),K.*cur(i,:),tm(i)-tm(i-1));
-    ext_kfe(i,:) = res.Value(:);
-end
-
 plot(tm,ext_kfe);
+title("Continous Kalman Filter Observer");
 figure;
-
 
 % ====== Filtered Dynamics ==============
 
@@ -145,6 +137,7 @@ for i = 2:size(cur,1)
 end
 
 plot(tm,ext_df);
+title("Filtered dynamics");
 figure;
 
 % ===== Filtered Range ===================
@@ -168,7 +161,7 @@ for i = 2:size(cur,1)
 end
 
 plot(tm,[ext_up(:,3),ext_low(:,3),ext_df(:,3)]); 
-
+title("Range");
 
 % =============== exit ===================
 
