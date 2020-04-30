@@ -10,7 +10,7 @@ FDIR = ${URDIR}/F_vctr_fcn/F_vctr_fcn
        
 SRC = bin/observers.o bin/robot.o bin/mfnc.o bin/minit.o bin/mterm.o \
       bin/cfnc.o bin/cinit.o bin/cterm.o bin/gfnc.o bin/ginit.o \
-      bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o bin/ckfilter.o
+      bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o
       
 .PHONY: all clear test
 
@@ -26,9 +26,6 @@ clear:
 
 bin/observers.o: observers.cpp
 	${CC} ${CFLAGS} observers.cpp -c -fPIC -o $@
-	
-bin/ckfilter.o: ../lib/kalman_filter_continous.cpp
-	${CC} ${INCDIR} ../lib/kalman_filter_continous.cpp -c -fPIC -o $@
 	
 bin/robot.o: ${URDIR}/ur_robot.cpp 
 	${CC} ${CFLAGS} ${URDIR}/ur_robot.cpp -c -fPIC -o $@
@@ -69,14 +66,14 @@ bin/finit.o: ${FDIR}_initialize.c
 bin/fterm.o: ${FDIR}.c
 	${CC} ${CFLAGS} ${FDIR}_terminate.c -c -fPIC -o $@
 	
-#test: test_lib.cpp
-	#${CC} ${CFLAGS} -Wl,-rpath=$(shell pwd) test_lib.cpp -o test_lib  -L. -l:observers.so
+test: test_lib.cpp
+	${CC} ${CFLAGS} -Wl,-rpath=$(shell pwd) test_lib.cpp -o test_lib  -L. -l:observers.so
 	
-test: bin/testit.o ${SRC}
-	${CC} ${CFLAGS} bin/testit.o ${SRC} -o test_all
+#test: bin/testit.o ${SRC}
+#	${CC} ${CFLAGS} bin/testit.o ${SRC} -o test_all
 	
-bin/testit.o: test_lib.cpp
-	${CC} ${CFLAGS} test_lib.cpp -c -fPIC -o $@
+#bin/testit.o: test_lib.cpp
+#	${CC} ${CFLAGS} test_lib.cpp -c -fPIC -o $@
 	
 
 
