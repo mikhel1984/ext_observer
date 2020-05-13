@@ -49,14 +49,15 @@ Vector FRangeObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, dou
 
   if(isRun) {
     res = f2.filt(p,dt).array().abs() + f2.getOmega() * p.array().abs() ;
-    p = dyn->getFriction(qd).array().abs() + dyn->getG(q).array().abs() 
-        + (dyn->getC(q,qd).transpose() * qd).array().abs();  // reuse 
+    p = dyn->getFriction(qd) + dyn->getG(q) 
+        + (dyn->getC(q,qd).transpose() * qd);  // reuse 
     p *= shift;
-    res += f1.filt(p,dt);
+    p = f1.filt(p,dt).array().abs();
+    res += p;
   } else {
     f2.set(p);
-    p = dyn->getFriction(qd).array().abs() + dyn->getG(q).array().abs() 
-        + (dyn->getC(q,qd).transpose() * qd).array().abs();  // reuse 
+    p = dyn->getFriction(qd) + dyn->getG(q) 
+        + (dyn->getC(q,qd).transpose() * qd);  // reuse 
     p *= shift;
     f1.set(p);
     res.setZero();
