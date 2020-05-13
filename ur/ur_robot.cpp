@@ -34,6 +34,18 @@ double rgdLst[NPARAM] = {16.017661,-2.0048e-24,-4.2449e-22,16.017661,
 -0.002076,-0.013982,0.035360,-0.004008,0.008145,0.002666,-0.001080,
 -0.015801,0.222170};
 
+double drvsDif[NJ] = {0, 0.0889, 0.0789, 0.0618, 0.0651, 0.0567};
+double fricDif[NFRIC] = {0.0686, 0.0410, 0.0222, 0.0949, 0.0451, 0.0759, 0.0985,
+0.0378, 0.0512, 0.0865, 0.0380, 0.0240, 0.0862, 0.0382,
+0.0232, 0.0744, 0.0421, 0.0233};
+double rgdDif[NPARAM] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.0502, 0.0411, 0, 
+0.0542, 0.0766, 0.0085, 0, 0.0052, 0, 0.0765, 0.0454,
+0.0355, 0.0604, 0.0410, 0, 0.0072, 0, 0.0054, 0, 0.0758,
+0.0318, 0.0313, 0, 0.0336, 0.0719, 0.0040, 0, 0, 0, 
+0.0621, 0.0171, 0.0245, 0.0425, 0.0219, 0, 0.0041, 0.0030,
+0.0033, 0, 0.0423, 0.0159, 0.0144, 0.0274, 0.0146, 0.0429,
+0.0020, 0, 0.0026, 0};
+
 
 UrRobot::UrRobot()
        : RobotDynamics()
@@ -50,7 +62,10 @@ UrRobot::UrRobot()
   G_vctr_fcn_initialize();
   M_mtrx_fcn_initialize();
   // parameters 
-  
+        
+  for(int i = 0; i < NJ; i++) drvsDif[i] += drvsLst[i];
+  for(int i = 0; i < NFRIC; i++) fricDif[i] += fricLst[i];
+  for(int i = 0; i < NPARAM; i++) rgdDif[i] += rgdLst[i];   
 }
 
 UrRobot::~UrRobot()
@@ -77,6 +92,32 @@ Matrix UrRobot::getM(Vector& q)
   return M;
 }
 
+Matrix UrRobot::varM(Vector& q)
+{
+  for(int i = 0; i < NJ; i++) qArr[i] = q(i);
+  // M + dM
+  M_mtrx_fcn(qArr,rgdDif,mArr); 
+  // save
+  for(int i = 0; i < NJ; i++){
+    for(int j = 0; j < NJ; j++) 
+      M(i,j) = mArr[NJ*j+i];
+  }
+  for(int i = 0; i < NJ; i++) 
+    M(i,i) += drvsDif[i];
+  
+  // M 
+  M_mtrx_fcn(qArr,param,mArr); 
+  
+  for(int i = 0; i < NJ; i++){
+    for(int j = 0; j < NJ; j++) 
+      M(i,j) -= mArr[NJ*j+i];
+  }
+  for(int i = 0; i < NJ; i++) 
+    M(i,i) -= dyn[i];
+  
+  return M;
+}
+
 Vector UrRobot::getG(Vector& q)
 {
   for(int i = 0; i < NJ; i++) qArr[i] = q(i);
@@ -85,6 +126,24 @@ Vector UrRobot::getG(Vector& q)
   // save 
   for(int i = 0; i < NJ; i++) 
     G(i) = gArr[i];
+  return G;
+}
+
+Vector UrRobot::varG(Vector& q)
+{
+  for(int i = 0; i < NJ; i++) qArr[i] = q(i);
+  // G + dG
+  G_vctr_fcn(qArr,rgdDif,gArr);
+  // save 
+  for(int i = 0; i < NJ; i++) 
+    G(i) = gArr[i];
+        
+  // G
+  G_vctr_fcn(qArr,param,gArr);
+  // save 
+  for(int i = 0; i < NJ; i++) 
+    G(i) -= gArr[i];
+        
   return G;
 }
 
@@ -104,6 +163,31 @@ Matrix UrRobot::getC(Vector& q, Vector& qd)
   return C; 
 }
 
+Matrix UrRobot::varC(Vector& q, Vector& qd)
+{
+  for(int i = 0; i < NJ; i++) {
+    qArr[i] = q(i);
+    qdArr[i] = qd(i);
+  }
+  // C + dC
+  C_mtrx_fcn(qArr,qdArr,rgdDif,cArr);
+  // save
+  for(int i = 0; i < NJ; i++){
+    for(int j = 0; j < NJ; j++) 
+      C(i,j) = cArr[NJ*j+i];
+  }
+  
+  // C
+  C_mtrx_fcn(qArr,qdArr,param,cArr);
+  // save
+  for(int i = 0; i < NJ; i++){
+    for(int j = 0; j < NJ; j++) 
+      C(i,j) -= cArr[NJ*j+i];
+  }
+  
+  return C; 
+}
+
 Vector UrRobot::getFriction(Vector& qd)
 {
   for(int i = 0; i < NJ; i++) qdArr[i] = qd(i);
@@ -112,5 +196,22 @@ Vector UrRobot::getFriction(Vector& qd)
   // copy
   for(int i = 0; i < NJ; i++) 
     F(i) = fArr[i];
+  return F;
+}
+
+Vector UrRobot::varFriction(Vector& qd)
+{
+  for(int i = 0; i < NJ; i++) qdArr[i] = qd(i);
+  // evaluate
+  F_vctr_fcn(qdArr,fricDif,fArr);
+  // copy
+  for(int i = 0; i < NJ; i++) 
+    F(i) = fArr[i];
+        
+  F_vctr_fcn(qdArr,fric,fArr);
+  // copy
+  for(int i = 0; i < NJ; i++) 
+    F(i) -= fArr[i];
+        
   return F;
 }

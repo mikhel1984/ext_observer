@@ -33,6 +33,8 @@ public:
    * @return torque loss due to friction.
    */
   virtual Vector getFriction(Vector& qd) = 0;
+
+  virtual Vector varFriction(Vector& qd) = 0;
   /** 
    * @brief Number of movable joints in robot.
    * @return Joint number.
@@ -54,6 +56,8 @@ public:
    * @return matrix M.
    */
   virtual Matrix getM(Vector& q) = 0;
+
+  virtual Matrix varM(Vector& q) = 0;
   /** 
    * @brief Get Coriolis/centrifugal matrix.
    * @param q joint angle vector.
@@ -61,12 +65,16 @@ public:
    * @return matrix C.
    */
   virtual Matrix getC(Vector& q, Vector& qd) = 0;
+
+  virtual Matrix varC(Vector& q, Vector& qd) = 0;
   /** 
    * @brief Get gravity terms.
    * @param q joint angle vector. 
    * @return vector G.
    */
   virtual Vector getG(Vector& q) = 0;
+  
+  virtual Vector varG(Vector& q) = 0;
   
 }; // RobotDynamics
 

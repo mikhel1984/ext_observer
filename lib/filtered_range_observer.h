@@ -44,21 +44,21 @@ void FRangeObserver::settings(double cutOffHz, double sampHz, double k)
 
 Vector FRangeObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
 {
-  p = dyn->getM(q) * qd;
-  p *= shift;
+  p = dyn->varM(q) * qd;
+  //p *= shift;
 
   if(isRun) {
     res = f2.filt(p,dt).array().abs() + f2.getOmega() * p.array().abs() ;
-    p = dyn->getFriction(qd) + dyn->getG(q) 
-        + (dyn->getC(q,qd).transpose() * qd);  // reuse 
-    p *= shift;
+    p = dyn->varFriction(qd) + dyn->varG(q) 
+        + (dyn->varC(q,qd).transpose() * qd);  // reuse 
+    //p *= shift;
     p = f1.filt(p,dt).array().abs();
     res += p;
   } else {
     f2.set(p);
-    p = dyn->getFriction(qd) + dyn->getG(q) 
-        + (dyn->getC(q,qd).transpose() * qd);  // reuse 
-    p *= shift;
+    p = dyn->varFriction(qd) + dyn->varG(q) 
+        + (dyn->varC(q,qd).transpose() * qd);  // reuse 
+    //p *= shift;
     f1.set(p);
     res.setZero();
     isRun = true;

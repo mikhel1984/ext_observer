@@ -17,11 +17,19 @@ public:
 
   Matrix getM(Vector& q);
   
+  Matrix varM(Vector& q);
+  
   Matrix getC(Vector& q, Vector& qd);
+  
+  Matrix varC(Vector& q, Vector& qd);
   
   Vector getG(Vector& q);
   
+  Vector varG(Vector& q);
+  
   Vector getFriction(Vector& qd);
+  
+  Vector varFriction(Vector& qd) ;
 
 
 private:
