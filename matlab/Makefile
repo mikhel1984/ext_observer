@@ -10,7 +10,7 @@ FDIR = ${URDIR}/F_vctr_fcn/F_vctr_fcn
        
 SRC = bin/observers.o bin/robot.o bin/mfnc.o bin/minit.o bin/mterm.o \
       bin/cfnc.o bin/cinit.o bin/cterm.o bin/gfnc.o bin/ginit.o \
-      bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o
+      bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o bin/fcont.o 
       
 .PHONY: all clear test
 
@@ -26,6 +26,9 @@ clear:
 
 bin/observers.o: observers.cpp
 	${CC} ${CFLAGS} observers.cpp -c -fPIC -o $@
+	
+bin/fcont.o: ../lib/kalman_filter_continous.cpp
+	${CC} ${CFLAGS} ../lib/kalman_filter_continous.cpp -c -fPIC -o $@
 	
 bin/robot.o: ${URDIR}/ur_robot.cpp 
 	${CC} ${CFLAGS} ${URDIR}/ur_robot.cpp -c -fPIC -o $@
