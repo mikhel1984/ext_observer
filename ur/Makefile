@@ -14,8 +14,12 @@ SRC_TCP = bin/listener.o bin/robot.o bin/mfnc.o bin/minit.o bin/mterm.o \
       bin/cfnc.o bin/cinit.o bin/cterm.o bin/gfnc.o bin/ginit.o \
       bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o 
 
+SRC_CMP = bin/compare.o bin/robot.o bin/mfnc.o bin/minit.o bin/mterm.o \
+      bin/cfnc.o bin/cinit.o bin/cterm.o bin/gfnc.o bin/ginit.o \
+      bin/gterm.o bin/ffnc.o bin/finit.o bin/fterm.o 
 
-.PHONY: all clear listen
+
+.PHONY: all clear listen compare
 
 # get information from csv file
 all: ${SRC}
@@ -25,10 +29,16 @@ all: ${SRC}
 listen: ${SRC_TCP}
 	${CC} ${SRC_TCP} -o listen -lm 
 
+compare: ${SRC_CMP}
+	${CC} ${SRC_CMP} -o compare -lm
+
 # remove object files
 clear:
 	rm -f bin/*.o
 	rm -f external.csv
+
+bin/compare.o: compare.cpp
+	${CC} ${CFLAGS} compare.cpp -c -o $@
 
 # make object files
 bin/main.o: test.cpp
