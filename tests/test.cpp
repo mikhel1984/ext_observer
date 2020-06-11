@@ -7,11 +7,11 @@
 //
 //#include "../lib/momentum_observer.h" 
 //#include "../lib/disturbance_observer.h"
-//#include "../lib/sliding_mode_observer.h"
+#include "../lib/sliding_mode_observer.h"
 //#include "../lib/disturbance_kalman_filter.h"
 //#include "../lib/filtered_dyn_observer.h"
 //#include "../lib/filtered_range_observer.h"
-#include "../lib/disturbance_kalman_filter_exp.h"
+//#include "../lib/disturbance_kalman_filter_exp.h"
 
 #define OMEGA1 1.3
 #define OMEGA2 0.8 
@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
 #ifdef MOMENTUM_OBSERVER_H
   Vector k(2);
-  k << 50,50; 
+  k << 30,30;
   MomentumObserver m_observer(&robot,k);
 #endif 
 #ifdef DISTURBANCE_OBSERVER_H
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 #endif
 #ifdef SLIDING_MODE_OBSERVER_H
   Vector T1(2), S1(2), T2(2), S2(2);
-  S1 << 20,30; 
+  S1 << 15,20; 
   T1(0) = 2*sqrt(S1(0)); T1(1) = 2*sqrt(S1(1));
   S2 << 10,10; // set 0 to exclude linear part
   T2(0) = 2*sqrt(S2(0)); T2(1) = 2*sqrt(S2(1));

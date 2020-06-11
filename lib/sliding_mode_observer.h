@@ -98,6 +98,7 @@ Vector SlidingModeObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau
 
   p = p_hat - p;  // reuse p
   for(int i = 0; i < jointNo; i++) spp(i) = tanh(p(i)*BIG);
+  //for(int i = 0; i < jointNo; i++) spp(i) = (p(i) > 0 ? 1 : (p(i) < 0 ? -1 : 0));
 
   dp_hat = torque + dyn->getC(q,qd).transpose()*qd - dyn->getG(q) + sigma;
   for(int i = 0; i < jointNo; i++) {

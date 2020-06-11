@@ -44,7 +44,7 @@ private:
   // intermediate variables
   Vector p, beta, torque, tprev;
   // coefficients
-  Vector ko, ko_rat;
+  Vector ko;
   
 }; // MomentumObserver 
 
@@ -58,7 +58,6 @@ MomentumObserver::MomentumObserver(RobotDynamics *rd, Vector& k)
   , torque(Vector(jointNo))
   , tprev(Vector(jointNo))
   , ko(k)
-  , ko_rat(Vector(jointNo))
 { 
   settings(k);
 }
@@ -86,7 +85,7 @@ Vector MomentumObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, d
   // elementwise product
   for(int i = 0; i < jointNo; i++) {
     r(i) = ko(i) * p(i);
-    torque(i) = ko_rat(i) * r(i);   // reuse variable
+    torque(i) = r(i);
   }
   
   return torque;
@@ -96,7 +95,6 @@ Vector MomentumObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, d
 void MomentumObserver::settings(Vector& k)
 {
   ko = k;
-  for(int i = 0; i < jointNo; i++) ko_rat(i) = k(i)/(1+k(i));
 }
 
 #endif // MOMENTUM_OBSERVER_H
