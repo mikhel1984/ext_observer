@@ -71,7 +71,10 @@ int main(int argc, char** argv)
   
   // save to file 
   std::ofstream file;
-  file.open(FNAME); 
+  file.open(FNAME);
+  // second file with the robot state
+  std::ofstream file2;
+  file2.open("input.csv");
 
   double dt = TSTEP;
   for(double t = 0; t < 3; t += dt) {
@@ -115,9 +118,14 @@ int main(int argc, char** argv)
 #endif
     
     file << t << "," << ext(0) << "," << ext(1) << std::endl;
+    // robot state
+    file2 << t << "," << q(0) << "," << q(1) << ","
+                      << qd(0) << "," << qd(1) << ","
+                      << tau(0) << "," << tau(1) << std::endl;
   }
       
   file.close();
+  file2.close();
   
   return 0;
 }

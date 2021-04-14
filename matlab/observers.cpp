@@ -1,4 +1,4 @@
-#include "../ur/ur_robot.h"
+#include "../tests/double_link.h"
 #include "../lib/momentum_observer.h"
 #include "../lib/disturbance_observer.h"
 #include "../lib/sliding_mode_observer.h"
@@ -12,7 +12,7 @@
 #define ARRAY_LEN 30  // max number of observers
 
 // robot dynamics
-static UrRobot robot;
+static DoubleLink robot;
 // observers
 static ExternalObserver *observer[ARRAY_LEN] = {0};
 // position to add new element

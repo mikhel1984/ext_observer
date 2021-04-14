@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     //if(curr < tBeg || curr > tEnd) continue;
 
     // read values
-    for(int i = 0; i < N; i++) {
+    for(int i = 0; i < JOINT_NO; i++) {
       q[i]   = val[BEG_Q + i];
       qd[i]  = val[BEG_QD + i];
       tau[i] = val[BEG_TAU + i] * K[i];
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 
     // save result 
     oFile <<  curr;
-    for(int i = 0; i < N; i++) {
+    for(int i = 0; i < JOINT_NO; i++) {
       oFile << "," << ext[i];
     }
     oFile << std::endl;
