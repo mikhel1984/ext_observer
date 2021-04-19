@@ -1,3 +1,6 @@
+% External torque observers - comparison
+% 2020, Stanislav Mikhel
+
 clear all; close all
 % get library
 if not(libisloaded('observers'))
@@ -7,14 +10,15 @@ end
 %libfunctions observers -full
 
 % read file
-data = csvread('link4.csv');
-tm   = data(:,1);
-q    = data(:,2:7);
-qd   = data(:,8:13);
-cur  = data(:,14:19);
+data = csvread('input.csv');
+tm   = data(:,1);      % time
+q    = data(:,2:3);    % angles
+qd   = data(:,4:5);    % velocities
+cur  = data(:,6:7);    % torques
 
-K = [10.0,10.6956,8.4566,9.0029,9.48,10.1232];
-res = libpointer('doublePtr',zeros(1,6));
+JNT = 2;
+K = [1,1];    % current to torque, N/A
+res = libpointer('doublePtr',zeros(1,JNT));
 
 % use 
 % calllib('observers','reset',id)
@@ -23,7 +27,7 @@ res = libpointer('doublePtr',zeros(1,6));
 % ========== Momentum Observer ================
 
 % configuration
-Kmo = [90,50,50,90,90,40];  
+Kmo = [50,50];  
 
 % get observer ID
 id_mo = calllib('observers','configMomentumObserver',-1,Kmo);  %    -1 means create and configure
@@ -60,9 +64,9 @@ figure;
 % ======= Sliding Mode Observer ============
 
 % configuration
-S1 = [20,30,20,30,20,30];
+S1 = [20,30];
 T1 = 2*sqrt(S1);
-S2 = [10,10,10,10,10,10];
+S2 = [10,10];
 T2 = 2*sqrt(S2);
 
 % get ID
@@ -81,10 +85,10 @@ figure;
 % ========= Kalman Filter Observer =======
 
 % configuration 
-S = zeros(6,6);
-H = eye(6,6);
-Q = blkdiag(0.002*eye(6,6), 0.3*eye(6,6));
-R = 0.05*eye(6,6);
+S = zeros(JNT,JNT);
+H = eye(JNT,JNT);
+Q = blkdiag(0.002*eye(JNT,JNT), 0.3*eye(JNT,JNT));
+R = 0.05*eye(JNT,JNT);
 
 % get ID
 id_kf = calllib('observers','configDistKalmanObserver',-1,S,H,Q,R);
@@ -102,10 +106,10 @@ figure;
 % ========= Kalman Filter Continous System Observer ===== 
 
 % configuration 
-%S = zeros(6,6);
-%H = eye(6,6);
-%Q = blkdiag(0.2*eye(6,6), 30*eye(6,6));
-%R = 0.0005*eye(6,6);
+%S = zeros(JOINT_NO,JOINT_NO);
+%H = eye(JOINT_NO,JOINT_NO);
+%Q = blkdiag(0.2*eye(JOINT_NO,JOINT_NO), 30*eye(JOINT_NO,JOINT_NO));
+%R = 0.0005*eye(JOINT_NO,JOINT_NO);
 
 % get ID
 %id_kfe = calllib('observers','configDistKalmanObserverExp',-1,S,H,Q,R);
@@ -160,7 +164,8 @@ for i = 2:size(cur,1)
     ext_low(i,:) = res.Value(:);
 end
 
-plot(tm,[ext_up(:,3),ext_low(:,3),ext_df(:,3)]); 
+n = 1;  % joint index
+plot(tm,[ext_up(:,n),ext_low(:,n),ext_df(:,n)]); 
 title("Range");
 
 % =============== exit ===================
