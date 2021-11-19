@@ -13,4 +13,4 @@ External torque observers for a robot manipulator.
 
 **tests** contains some tests.
 
-Integration with **ROS** cam be found in the "ros_examples" branch.
+Integration with **ROS** can be found in the "ros_examples" branch.
