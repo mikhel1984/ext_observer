@@ -14,3 +14,9 @@ External torque observers for a robot manipulator.
 **tests** contains some tests.
 
 Integration with **ROS** can be found in the "ros_examples" branch.
+
+The library was developed for the research 
+```
+Mamedov, S., Mikhel, S. (2020). Practical aspects of model-based collision detection. 
+Frontiers in Robotics and AI, 7, 162.
+```
