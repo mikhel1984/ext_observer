@@ -34,7 +34,7 @@ public:
   /**
    * @brief Object destructor.
    */
-  ~DKalmanObserverExp();
+  virtual ~DKalmanObserverExp();
   /**
    * @brief External torque estimation.
    * @param q joint angle vector.

@@ -48,6 +48,7 @@ public:
  */ 
 class RobotDynamics : public RobotDynamicsBase {
 public:
+  virtual ~RobotDynamics() {}
   /** 
    * @brief Get inertia matrix.
    * @param q joint angle vector.
@@ -77,6 +78,7 @@ public:
  */
 class RobotDynamicsRnea : public RobotDynamicsBase {
 public:
+  virtual ~RobotDynamicsRnea() {}
   /**
    * @brief Object constructor.
    */
@@ -130,7 +132,7 @@ public:
   ExternalObserverBase()
   : jointNo(0)
   , objType(-1)
-  , isRun(false) {}  
+  , isRun(false) {}
   /**
    * @brief Estimate external torques.
    * 
@@ -172,7 +174,9 @@ public:
   ExternalObserver(RobotDynamics *rd, int type)
   : ExternalObserverBase()
   , dyn(rd) 
-  { jointNo = rd->jointNo(); objType = type; }  
+  { jointNo = rd->jointNo(); objType = type; }
+
+  virtual ~ExternalObserver() {}
 
 protected:
   RobotDynamics *dyn;    /**< Pointer to the robot interface. */
@@ -193,7 +197,9 @@ public:
   ExternalObserverRnea(RobotDynamicsRnea *rd, int type) 
   : ExternalObserverBase()
   , dyn(rd)
-  { jointNo = rd->jointNo(); objType = type; }  
+  { jointNo = rd->jointNo(); objType = type; }
+
+  virtual ~ExternalObserverRnea() {}
 
 protected:
   RobotDynamicsRnea *dyn; /**< Pointer to the robot interface. */  
