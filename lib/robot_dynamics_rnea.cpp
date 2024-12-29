@@ -20,6 +20,7 @@ VectorJ RobotDynamicsRnea::tranCqd(VectorJ& q, VectorJ& qd)
   _zero.resize(N);
   _zero.setZero();
   _p0 = rnea(q, _zero, qd);  // M * qd
+  _sum.resize(N);
   _sum.setZero();
 
   for(int i = 0; i < N; i++) {
