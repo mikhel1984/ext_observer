@@ -1,3 +1,5 @@
+// Copyright 2020-2024 Stanislav Mikhel
+
 /**
  * @file disturbance_kalman_filter.h
  *
@@ -13,14 +15,12 @@
 
 #define ID_DKalmanObserverExp 7
 
-//#include <iostream>
-
 /**
  * @brief Disturbance Kalman filter from Hu et. al.
  *
  * Use matrix exponent for discretizaion.
  */
-class DKalmanObserverExp : public ExternalObserver {
+class DKalmanObserverExp final : public ExternalObserver {
 public:
   /**
    * @brief Object constructor
@@ -30,11 +30,13 @@ public:
    * @param q covariance of the process noise.
    * @param r covariance of the observation noise.
    */
-  DKalmanObserverExp(RobotDynamics* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r);
+  DKalmanObserverExp(RobotDynamics* rd, MatrixJ& s, MatrixJ& h, MatrixJ& q, MatrixJ& r);
+
   /**
    * @brief Object destructor.
    */
   virtual ~DKalmanObserverExp();
+
   /**
    * @brief External torque estimation.
    * @param q joint angle vector.
@@ -43,50 +45,52 @@ public:
    * @param dt time step.
    * @return external torque vector.
    */
-  Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt);
+  VectorJ getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt) override;
+
   /**
    * @brief Observer settings.
    * @param q covariance of the process noise.
    * @param r covariance of the observation noise.
    */
-  void settings(Matrix& q, Matrix& r); 
+  void settings(MatrixJ& q, MatrixJ& r);
 
 private:
   // disturbance observation
-  Matrix H, M;
+  MatrixJ H, M;
   // state, input and momentum
-  Vector X, u, p;
+  VectorJ X, u, p;
   // Kalman filter object
   KalmanFilterContinous *filter;
+};  // DKalmanObserverExp
 
-}; // DKalmanObserverExp
 
 // Initialization
-DKalmanObserverExp::DKalmanObserverExp(RobotDynamics* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r)
-  : ExternalObserver(rd,ID_DKalmanObserverExp)
+DKalmanObserverExp::DKalmanObserverExp(
+  RobotDynamics* rd, MatrixJ& s, MatrixJ& h, MatrixJ& q, MatrixJ& r)
+  : ExternalObserver(rd, ID_DKalmanObserverExp)
   , H(h)
-  , M(Matrix(jointNo,jointNo))
-  , X(Vector(2*jointNo))
-  , u(Vector(jointNo))
-  , p(Vector(jointNo))
-  , filter(0)  
+  , M(MatrixJ(jointNo, jointNo))
+  , X(VectorJ(2*jointNo))
+  , u(VectorJ(jointNo))
+  , p(VectorJ(jointNo))
+  , filter(0)
 {
   // prepare matrices
-  Matrix A(2*jointNo,2*jointNo), B(2*jointNo,jointNo), C(jointNo,2*jointNo); 
+  MatrixJ A(2*jointNo, 2*jointNo), B(2*jointNo, jointNo), C(jointNo, 2*jointNo);
   B.setZero();
   C.setZero();
   // B & C matrices
   for(int i = 0; i < jointNo; i++) {
-    B(i,i) = 1;
-    C(i,i) = 1;
+    B(i, i) = 1;
+    C(i, i) = 1;
   }
   // A matrix
-  A.setZero(); 
-  A.block(      0,jointNo,jointNo,jointNo) = h;
-  A.block(jointNo,jointNo,jointNo,jointNo) = s;
+  A.setZero();
+  A.block(      0, jointNo, jointNo, jointNo) = h;
+  A.block(jointNo, jointNo, jointNo, jointNo) = s;
   // make filter
-  filter = new KalmanFilterContinous(A,B,C);
-  filter->setCovariance(q,r);
+  filter = new KalmanFilterContinous(A, B, C);
+  filter->setCovariance(q, r);
 }
 
 // Clear dynamically allocated memory
@@ -96,17 +100,17 @@ DKalmanObserverExp::~DKalmanObserverExp()
 }
 
 // Torque estimation
-Vector DKalmanObserverExp::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
+VectorJ DKalmanObserverExp::getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt)
 {
   M = dyn->getM(q);
   p = M * qd;
   u = tau - dyn->getG(q) - dyn->getFriction(qd);
-  u += dyn->getC(q,qd).transpose() * qd;
+  u += dyn->getC(q, qd).transpose() * qd;
 
   filter->updateR(M);
-  
+
   if(isRun) {
-    X = filter->step(u,p,dt);
+    X = filter->step(u, p, dt);
   } else {
     // prepare X0
     X.setZero();
@@ -116,15 +120,15 @@ Vector DKalmanObserverExp::getExternalTorque(Vector& q, Vector& qd, Vector& tau,
     isRun = true;
   }
   // disturbance = H * omega   (reuse variable)
-  p = H * X.block(jointNo,0,jointNo,1);
+  p = H * X.block(jointNo, 0, jointNo, 1);
 
   return p;
 }
 
 // settings
-void DKalmanObserverExp::settings(Matrix& Q, Matrix& R)
+void DKalmanObserverExp::settings(MatrixJ& Q, MatrixJ& R)
 {
-  filter->setCovariance(Q,R);
+  filter->setCovariance(Q, R);
 }
 
-#endif // DISTURBANCE_KALMAN_FILTER_EXP_H
+#endif  // DISTURBANCE_KALMAN_FILTER_EXP_H

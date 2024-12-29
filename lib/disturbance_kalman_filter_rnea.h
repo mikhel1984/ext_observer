@@ -1,3 +1,5 @@
+// Copyright 2020-2024 Stanislav Mikhel
+
 /**
  * @file disturbance_kalman_filter.h
  *
@@ -13,14 +15,12 @@
 
 #define ID_DKalmanObserverRnea 21
 
-//#include <iostream>
-
 /**
  * @brief Disturbance Kalman filter from Hu et. al.
- * 
+ *
  * Use RNEA technique for dynamics.
  */
-class DKalmanObserverRnea : public ExternalObserverRnea {
+class DKalmanObserverRnea final : public ExternalObserverRnea {
 public:
   /**
    * @brief Object constructor
@@ -30,11 +30,13 @@ public:
    * @param q covariance of the process noise.
    * @param r covariance of the observation noise.
    */
-  DKalmanObserverRnea(RobotDynamicsRnea* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r);
+  DKalmanObserverRnea(RobotDynamicsRnea* rd, MatrixJ& s, MatrixJ& h, MatrixJ& q, MatrixJ& r);
+
   /**
    * @brief Object destructor.
    */
   virtual ~DKalmanObserverRnea();
+
   /**
    * @brief External torque estimation.
    * @param q joint angle vector.
@@ -43,50 +45,51 @@ public:
    * @param dt time step.
    * @return external torque vector.
    */
-  Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt);
+  VectorJ getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt) override;
+
   /**
    * @brief Observer settings.
    * @param q covariance of the process noise.
    * @param r covariance of the observation noise.
    */
-  void settings(Matrix& q, Matrix& r);
+  void settings(MatrixJ& q, MatrixJ& r);
 
 private:
   // disturbance observation
-  Matrix H;
+  MatrixJ H;
   // state, input and momentum
-  Vector X, u, p, zero;
+  VectorJ X, u, p, zero;
   // Kalman filter object
   KalmanFilter *filter;
-
-}; // DKalmanObserverRnea
+};  // DKalmanObserverRnea
 
 // Initialization
-DKalmanObserverRnea::DKalmanObserverRnea(RobotDynamicsRnea* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r)
-  : ExternalObserverRnea(rd,ID_DKalmanObserverRnea)
+DKalmanObserverRnea::DKalmanObserverRnea(
+  RobotDynamicsRnea* rd, MatrixJ& s, MatrixJ& h, MatrixJ& q, MatrixJ& r)
+  : ExternalObserverRnea(rd, ID_DKalmanObserverRnea)
   , H(h)
-  , X(Vector(2*jointNo))
-  , u(Vector(jointNo))
-  , p(Vector(jointNo))
-  , zero(Vector::Zero(jointNo))
-  , filter(0)  
+  , X(VectorJ(2*jointNo))
+  , u(VectorJ(jointNo))
+  , p(VectorJ(jointNo))
+  , zero(VectorJ::Zero(jointNo))
+  , filter(0)
 {
   // prepare matrices
-  Matrix A(2*jointNo,2*jointNo), B(2*jointNo,jointNo), C(jointNo,2*jointNo); 
+  MatrixJ A(2*jointNo, 2*jointNo), B(2*jointNo, jointNo), C(jointNo, 2*jointNo);
   B.setZero();
   C.setZero();
   // B & C matrices
   for(int i = 0; i < jointNo; i++) {
-    B(i,i) = 1;
-    C(i,i) = 1;
+    B(i, i) = 1;
+    C(i, i) = 1;
   }
   // A matrix
-  A.setZero(); 
-  A.block(      0,jointNo,jointNo,jointNo) = h;
-  A.block(jointNo,jointNo,jointNo,jointNo) = s;
+  A.setZero();
+  A.block(      0, jointNo, jointNo, jointNo) = h;
+  A.block(jointNo, jointNo, jointNo, jointNo) = s;
   // make filter
-  filter = new KalmanFilter(A,B,C);
-  filter->setCovariance(q,r);
+  filter = new KalmanFilter(A, B, C);
+  filter->setCovariance(q, r);
 }
 
 // Clear dynamically allocated memory
@@ -96,14 +99,14 @@ DKalmanObserverRnea::~DKalmanObserverRnea()
 }
 
 // Torque estimation
-Vector DKalmanObserverRnea::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
+VectorJ DKalmanObserverRnea::getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt)
 {
-  p = dyn->rnea(q,zero,qd);     // M * qd
-  u = tau - dyn->rnea(q,zero,zero,GRAVITY) - dyn->getFriction(qd);
-  u += dyn->tranCqd(q,qd);      // C' * qd
+  p = dyn->rnea(q, zero, qd);     // M * qd
+  u = tau - dyn->rnea(q, zero, zero, GRAVITY) - dyn->getFriction(qd);
+  u += dyn->tranCqd(q, qd);      // C' * qd
 
   if(isRun) {
-    X = filter->step(u,p,dt);
+    X = filter->step(u, p, dt);
   } else {
     // prepare X0
     X.setZero();
@@ -113,15 +116,15 @@ Vector DKalmanObserverRnea::getExternalTorque(Vector& q, Vector& qd, Vector& tau
     isRun = true;
   }
   // disturbance = H * omega   (reuse variable)
-  p = H * X.block(jointNo,0,jointNo,1);
+  p = H * X.block(jointNo, 0, jointNo, 1);
 
   return p;
 }
 
 // settings
-void DKalmanObserverRnea::settings(Matrix& Q, Matrix& R)
+void DKalmanObserverRnea::settings(MatrixJ& Q, MatrixJ& R)
 {
-  filter->setCovariance(Q,R);
+  filter->setCovariance(Q, R);
 }
 
-#endif // DISTURBANCE_KALMAN_FILTER_RNEA_H
+#endif  // DISTURBANCE_KALMAN_FILTER_RNEA_H

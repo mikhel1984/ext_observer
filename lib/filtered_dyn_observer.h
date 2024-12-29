@@ -1,3 +1,4 @@
+// Copyright 2020-2024 Stanislav Mikhel
 
 #ifndef FILTERED_DYNAMIC_OBSERVER_H
 #define FILTERED_DYNAMIC_OBSERVER_H
@@ -5,52 +6,50 @@
 #include "external_observer.h"
 #include "iir_filter.h"
 
-#include <iostream>
-
 #define ID_FDynObserver 2
 
-class FDynObserver : public ExternalObserver {
+class FDynObserver final : public ExternalObserver {
 public:
   FDynObserver(RobotDynamics *rd, double cutOffHz, double sampHz);
 
-  Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt);
+  VectorJ getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt) override;
 
   void settings(double cutOffHz, double sampHz);
 
 private:
   FilterF1 f1;
   FilterF2 f2;
-  Vector p, res;
+  VectorJ p, res;
+};  // FDynObserver
 
-}; // FDynObserver
 
 FDynObserver::FDynObserver(RobotDynamics *rd, double cutOffHz, double sampHz)
-  : ExternalObserver(rd,ID_FDynObserver)
-  , f1(FilterF1(cutOffHz,sampHz,jointNo))
-  , f2(FilterF2(cutOffHz,sampHz,jointNo))
-  , p(Vector(jointNo))
-  , res(Vector(jointNo))
+  : ExternalObserver(rd, ID_FDynObserver)
+  , f1(FilterF1(cutOffHz, sampHz, jointNo))
+  , f2(FilterF2(cutOffHz, sampHz, jointNo))
+  , p(VectorJ(jointNo))
+  , res(VectorJ(jointNo))
 {
 }
 
 void FDynObserver::settings(double cutOffHz, double sampHz)
 {
-  f1.update(cutOffHz,sampHz);
-  f2.update(cutOffHz,sampHz);
+  f1.update(cutOffHz, sampHz);
+  f2.update(cutOffHz, sampHz);
 }
 
-Vector FDynObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
+VectorJ FDynObserver::getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt)
 {
   p = dyn->getM(q) * qd;
 
   if(isRun) {
-    res = f2.filt(p,dt) + f2.getOmega() * p ;
-    p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q,qd).transpose() * qd;  // reuse 
+    res = f2.filt(p, dt) + f2.getOmega() * p ;
+    p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q, qd).transpose() * qd;  // reuse
     p -= tau;
-    res += f1.filt(p,dt);
+    res += f1.filt(p, dt);
   } else {
     f2.set(p);
-    p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q,qd).transpose() * qd;  // reuse 
+    p = dyn->getFriction(qd) + dyn->getG(q) - dyn->getC(q, qd).transpose() * qd;  // reuse
     p -= tau;
     f1.set(p);
     res.setZero();
@@ -60,4 +59,4 @@ Vector FDynObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, doubl
   return res;
 }
 
-#endif // FILTERED_DYNAMIC_OBSERVER_H
+#endif  // FILTERED_DYNAMIC_OBSERVER_H

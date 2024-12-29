@@ -1,3 +1,5 @@
+// Copyright 2020-2024 Stanislav Mikhel
+
 /**
  * @file disturbance_kalman_filter.h
  *
@@ -13,12 +15,10 @@
 
 #define ID_DKalmanObserver 1
 
-//#include <iostream>
-
 /**
  * @brief Disturbance Kalman filter from Hu et. al.
  */
-class DKalmanObserver : public ExternalObserver {
+class DKalmanObserver final : public ExternalObserver {
 public:
   /**
    * @brief Object constructor
@@ -28,11 +28,13 @@ public:
    * @param q covariance of the process noise.
    * @param r covariance of the observation noise.
    */
-  DKalmanObserver(RobotDynamics* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r);
+  DKalmanObserver(RobotDynamics* rd, MatrixJ& s, MatrixJ& h, MatrixJ& q, MatrixJ& r);
+
   /**
    * @brief Object destructor.
    */
   virtual ~DKalmanObserver();
+
   /**
    * @brief External torque estimation.
    * @param q joint angle vector.
@@ -41,49 +43,50 @@ public:
    * @param dt time step.
    * @return external torque vector.
    */
-  Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt);
+  VectorJ getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt) override;
+
   /**
    * @brief Observer settings.
    * @param q covariance of the process noise.
    * @param r covariance of the observation noise.
    */
-  void settings(Matrix& q, Matrix& r);
+  void settings(MatrixJ& q, MatrixJ& r);
 
 private:
   // disturbance observation
-  Matrix H;
+  MatrixJ H;
   // state, input and momentum
-  Vector X, u, p;
+  VectorJ X, u, p;
   // Kalman filter object
   KalmanFilter *filter;
+};  // DKalmanObserver
 
-}; // DKalmanObserver
 
 // Initialization
-DKalmanObserver::DKalmanObserver(RobotDynamics* rd, Matrix& s, Matrix& h, Matrix& q, Matrix& r)
-  : ExternalObserver(rd,ID_DKalmanObserver)
+DKalmanObserver::DKalmanObserver(RobotDynamics* rd, MatrixJ& s, MatrixJ& h, MatrixJ& q, MatrixJ& r)
+  : ExternalObserver(rd, ID_DKalmanObserver)
   , H(h)
-  , X(Vector(2*jointNo))
-  , u(Vector(jointNo))
-  , p(Vector(jointNo))
-  , filter(0)  
+  , X(VectorJ(2*jointNo))
+  , u(VectorJ(jointNo))
+  , p(VectorJ(jointNo))
+  , filter(0)
 {
   // prepare matrices
-  Matrix A(2*jointNo,2*jointNo), B(2*jointNo,jointNo), C(jointNo,2*jointNo); 
+  MatrixJ A(2*jointNo, 2*jointNo), B(2*jointNo, jointNo), C(jointNo, 2*jointNo);
   B.setZero();
   C.setZero();
   // B & C matrices
   for(int i = 0; i < jointNo; i++) {
-    B(i,i) = 1;
-    C(i,i) = 1;
+    B(i, i) = 1;
+    C(i, i) = 1;
   }
   // A matrix
-  A.setZero(); 
-  A.block(      0,jointNo,jointNo,jointNo) = h;
-  A.block(jointNo,jointNo,jointNo,jointNo) = s;
+  A.setZero();
+  A.block(      0, jointNo, jointNo, jointNo) = h;
+  A.block(jointNo, jointNo, jointNo, jointNo) = s;
   // make filter
-  filter = new KalmanFilter(A,B,C);
-  filter->setCovariance(q,r);
+  filter = new KalmanFilter(A, B, C);
+  filter->setCovariance(q, r);
 }
 
 // Clear dynamically allocated memory
@@ -93,14 +96,14 @@ DKalmanObserver::~DKalmanObserver()
 }
 
 // Torque estimation
-Vector DKalmanObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
+VectorJ DKalmanObserver::getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt)
 {
   p = dyn->getM(q) * qd;
   u = tau - dyn->getG(q) - dyn->getFriction(qd);
-  u += dyn->getC(q,qd).transpose() * qd;
+  u += dyn->getC(q, qd).transpose() * qd;
 
   if(isRun) {
-    X = filter->step(u,p,dt);
+    X = filter->step(u, p, dt);
   } else {
     // prepare X0
     X.setZero();
@@ -110,15 +113,15 @@ Vector DKalmanObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, do
     isRun = true;
   }
   // disturbance = H * omega   (reuse variable)
-  p = H * X.block(jointNo,0,jointNo,1);
+  p = H * X.block(jointNo, 0, jointNo, 1);
 
   return p;
 }
 
 // settings
-void DKalmanObserver::settings(Matrix& Q, Matrix& R)
+void DKalmanObserver::settings(MatrixJ& Q, MatrixJ& R)
 {
-  filter->setCovariance(Q,R);
+  filter->setCovariance(Q, R);
 }
 
-#endif // DISTURBANCE_KALMAN_FILTER_H
+#endif  // DISTURBANCE_KALMAN_FILTER_H

@@ -1,8 +1,10 @@
+// Copyright 2020-2024 Stanislav Mikhel
+
 /**
  * @file momentum_observer_rnea.h
  *
  * @brief Momentum observer class.
- * 
+ *
  * Expected robot dynamics in form of RNEA.
  */
 #ifndef MOMENTUM_OBSERVER_RNEA_H
@@ -13,18 +15,19 @@
 #define ID_MomentumObserverRnea 25
 
 /**
- * @brief Momentum observer from De Luca et al. 
+ * @brief Momentum observer from De Luca et al.
  *
  * Find dynamics using RNEA technique.
  */
-class MomentumObserverRnea : public ExternalObserverRnea {
+class MomentumObserverRnea final : public ExternalObserverRnea {
 public:
   /**
-   * @brief Object constructor. 
+   * @brief Object constructor.
    * @param rd pointer to robot object.
    * @param k vector of joint gains.
    */
-  MomentumObserverRnea(RobotDynamicsRnea *rd, Vector& k);
+  MomentumObserverRnea(RobotDynamicsRnea *rd, VectorJ& k);
+
   /**
    * @brief External torque estimation.
    * @param q joint angle vector.
@@ -33,45 +36,46 @@ public:
    * @param dt time step.
    * @return external torque vector.
    */
-  Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt);
-  /** 
+  VectorJ getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt) override;
+
+  /**
    * @brief Observer settings.
    * @param k vector of the joint gains.
    */
-  void settings(Vector& k);
+  inline void settings(VectorJ& k) { ko = k; }
 
 private:
   // accumulators
-  Vector sum, r, zero;
+  VectorJ sum, r, zero;
   // intermediate variables
-  Vector p, beta, torque, tprev;
+  VectorJ p, beta, torque, tprev;
   // coefficients
-  Vector ko;
-  
-}; // MomentumObserverRnea 
+  VectorJ ko;
+};  // MomentumObserverRnea
+
 
 // Initialization
-MomentumObserverRnea::MomentumObserverRnea(RobotDynamicsRnea *rd, Vector& k) 
-  : ExternalObserverRnea(rd,ID_MomentumObserverRnea)
-  , sum(Vector(jointNo))
-  , r(Vector(jointNo))
-  , zero(Vector::Zero(jointNo))
-  , p(Vector(jointNo))
-  , beta(Vector(jointNo))
-  , torque(Vector(jointNo))
-  , tprev(Vector(jointNo))
+MomentumObserverRnea::MomentumObserverRnea(RobotDynamicsRnea *rd, VectorJ& k)
+  : ExternalObserverRnea(rd, ID_MomentumObserverRnea)
+  , sum(VectorJ(jointNo))
+  , r(VectorJ(jointNo))
+  , zero(VectorJ::Zero(jointNo))
+  , p(VectorJ(jointNo))
+  , beta(VectorJ(jointNo))
+  , torque(VectorJ(jointNo))
+  , tprev(VectorJ(jointNo))
   , ko(k)
-{ 
+{
   settings(k);
 }
 
 // Torque estimation
-Vector MomentumObserverRnea::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
+VectorJ MomentumObserverRnea::getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt)
 {
-  p = dyn->rnea(q,zero,qd);     // M * qd
-  beta = dyn->rnea(q,zero,zero,GRAVITY)- dyn->tranCqd(q,qd);  // G - C' * qd 
-  
-  torque = tau - dyn->getFriction(qd); // exclude friction   
+  p = dyn->rnea(q, zero, qd);     // M * qd
+  beta = dyn->rnea(q, zero, zero, GRAVITY)- dyn->tranCqd(q, qd);  // G - C' * qd
+
+  torque = tau - dyn->getFriction(qd);  // exclude friction
   if(isRun) {
     torque += r - beta;      // tau + r - beta
     sum += 0.5 * dt * (torque + tprev);
@@ -90,14 +94,8 @@ Vector MomentumObserverRnea::getExternalTorque(Vector& q, Vector& qd, Vector& ta
     r(i) = ko(i) * p(i);
     torque(i) = r(i);   // reuse variable
   }
-  
+
   return torque;
 }
 
-// Set gains
-void MomentumObserverRnea::settings(Vector& k)
-{
-  ko = k;
-}
-
-#endif // MOMENTUM_OBSERVER_RNEA_H
+#endif  // MOMENTUM_OBSERVER_RNEA_H

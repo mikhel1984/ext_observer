@@ -1,9 +1,11 @@
+// Copyright 2020-2024 Stanislav Mikhel
+
 /**
  * @file disturbance_observer.h
  *
  * @brief Disturbance observer class.
- * 
- * Expected explicit robot dynamics matrices. 
+ *
+ * Expected explicit robot dynamics matrices.
  */
 #ifndef DISTURBANCE_OBSERVER_H
 #define DISTURBANCE_OBSERVER_H
@@ -15,7 +17,7 @@
 /**
  * @brief Disturbance observer from Mohammadi et. al.
  */
-class DisturbanceObserver : public ExternalObserver {
+class DisturbanceObserver final : public ExternalObserver {
 public:
   /**
    * @brief Object constructor.
@@ -25,6 +27,7 @@ public:
    * @param beta ...
    */
   DisturbanceObserver(RobotDynamics *rd, double sigma, double xeta, double beta);
+
   /**
    * @brief External torque estimation.
    * @param q joint angle vector.
@@ -33,7 +36,8 @@ public:
    * @param dt time step.
    * @return external torque vector.
    */
-  Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt);
+  VectorJ getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt) override;
+
   /**
    * @brief Observer settings.
    * @param sigma ...
@@ -44,46 +48,46 @@ public:
 
 private:
   // temporary objects
-  Matrix Y, L, I;
-  Matrix lft, rht;
-  Vector p, z, torque;  
-  
-}; // DisturbanceObserver 
+  MatrixJ Y, L, I;
+  MatrixJ lft, rht;
+  VectorJ p, z, torque;
+};  // DisturbanceObserver
+
 
 // Initialization
 DisturbanceObserver::DisturbanceObserver(RobotDynamics *rd, double sigma, double xeta, double beta)
-  : ExternalObserver(rd,ID_DisturbanceObserver)
-  , Y(Matrix(jointNo,jointNo))
-  , L(Matrix(jointNo,jointNo))
-  , I(Matrix::Identity(jointNo,jointNo))
-  , lft(Matrix(jointNo,jointNo))
-  , rht(Matrix(jointNo,jointNo))
-  , p(Vector(jointNo))
-  , z(Vector(jointNo))
-  , torque(Vector(jointNo))
+  : ExternalObserver(rd, ID_DisturbanceObserver)
+  , Y(MatrixJ(jointNo, jointNo))
+  , L(MatrixJ(jointNo, jointNo))
+  , I(MatrixJ::Identity(jointNo, jointNo))
+  , lft(MatrixJ(jointNo, jointNo))
+  , rht(MatrixJ(jointNo, jointNo))
+  , p(VectorJ(jointNo))
+  , z(VectorJ(jointNo))
+  , torque(VectorJ(jointNo))
 {
-  settings(sigma,xeta,beta); 
+  settings(sigma, xeta, beta);
 }
 
 // Get torque
-Vector DisturbanceObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
+VectorJ DisturbanceObserver::getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt)
 {
   L = Y * dyn->getM(q).inverse();
-  L *= dt; 
+  L *= dt;
   p = Y * qd;
-  
+
   if(isRun) {
     torque = tau - dyn->getFriction(qd);
     lft = I + L;
-    rht = z + L*(dyn->getC(q,qd)*qd + dyn->getG(q) - torque - p);
-    z = lft.inverse() * rht;  
+    rht = z + L*(dyn->getC(q, qd)*qd + dyn->getG(q) - torque - p);
+    z = lft.inverse() * rht;
   } else {
     z = -p;
     isRun = true;
   }
-  
+
   p += z;
-  
+
   return p;
 }
 
@@ -91,7 +95,7 @@ Vector DisturbanceObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau
 void DisturbanceObserver::settings(double sigma, double xeta, double beta)
 {
   double k = 0.5*(xeta + 2*beta*sigma);
-  Y = k * Matrix::Identity(jointNo,jointNo); 
+  Y = k * MatrixJ::Identity(jointNo, jointNo);
 }
 
-#endif // DISTURBANCE_OBSERVER_H
+#endif  // DISTURBANCE_OBSERVER_H

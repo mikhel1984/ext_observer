@@ -1,9 +1,11 @@
+// Copyright 2020-2024 Stanislav Mikhel
+
 /**
  * @file momentum_observer.h
  *
  * @brief Momentum observer class.
- * 
- * Expected explicit robot dynamics matrices. 
+ *
+ * Expected explicit robot dynamics matrices.
  */
 #ifndef MOMENTUM_OBSERVER_H
 #define MOMENTUM_OBSERVER_H
@@ -13,16 +15,17 @@
 #define ID_MomentumObserver 5
 
 /**
- * @brief Momentum observer from De Luca et al. 
+ * @brief Momentum observer from De Luca et al.
  */
-class MomentumObserver : public ExternalObserver {
+class MomentumObserver final : public ExternalObserver {
 public:
   /**
-   * @brief Object constructor. 
+   * @brief Object constructor.
    * @param rd pointer to robot object.
    * @param k vector of joint gains.
    */
-  MomentumObserver(RobotDynamics *rd, Vector& k);
+  MomentumObserver(RobotDynamics *rd, VectorJ& k);
+
   /**
    * @brief External torque estimation.
    * @param q joint angle vector.
@@ -31,44 +34,45 @@ public:
    * @param dt time step.
    * @return external torque vector.
    */
-  Vector getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt);
-  /** 
+  VectorJ getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt) override;
+
+  /**
    * @brief Observer settings.
    * @param k vector of the joint gains.
    */
-  void settings(Vector& k);
+  inline void settings(VectorJ& k) { ko = k; }
 
 private:
   // accumulators
-  Vector sum, r;
+  VectorJ sum, r;
   // intermediate variables
-  Vector p, beta, torque, tprev;
+  VectorJ p, beta, torque, tprev;
   // coefficients
-  Vector ko;
-  
-}; // MomentumObserver 
+  VectorJ ko;
+};  // MomentumObserver
+
 
 // Initialization
-MomentumObserver::MomentumObserver(RobotDynamics *rd, Vector& k) 
-  : ExternalObserver(rd,ID_MomentumObserver)
-  , sum(Vector(jointNo))
-  , r(Vector(jointNo))
-  , p(Vector(jointNo))
-  , beta(Vector(jointNo))
-  , torque(Vector(jointNo))
-  , tprev(Vector(jointNo))
+MomentumObserver::MomentumObserver(RobotDynamics *rd, VectorJ& k)
+  : ExternalObserver(rd, ID_MomentumObserver)
+  , sum(VectorJ(jointNo))
+  , r(VectorJ(jointNo))
+  , p(VectorJ(jointNo))
+  , beta(VectorJ(jointNo))
+  , torque(VectorJ(jointNo))
+  , tprev(VectorJ(jointNo))
   , ko(k)
-{ 
+{
   settings(k);
 }
 
 // Torque estimation
-Vector MomentumObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, double dt)
+VectorJ MomentumObserver::getExternalTorque(VectorJ& q, VectorJ& qd, VectorJ& tau, double dt)
 {
   p = dyn->getM(q) * qd;     // M * qd
-  beta = dyn->getG(q) - dyn->getC(q,qd).transpose() * qd;  // G - C' * qd 
-  
-  torque = tau - dyn->getFriction(qd); // exclude friction   
+  beta = dyn->getG(q) - dyn->getC(q, qd).transpose() * qd;  // G - C' * qd
+
+  torque = tau - dyn->getFriction(qd);  // exclude friction
   if(isRun) {
     torque += r - beta;      // tau + r - beta
     sum += 0.5 * dt * (torque + tprev);
@@ -87,14 +91,8 @@ Vector MomentumObserver::getExternalTorque(Vector& q, Vector& qd, Vector& tau, d
     r(i) = ko(i) * p(i);
     torque(i) = r(i);
   }
-  
+
   return torque;
 }
 
-// Set gains
-void MomentumObserver::settings(Vector& k)
-{
-  ko = k;
-}
-
-#endif // MOMENTUM_OBSERVER_H
+#endif  // MOMENTUM_OBSERVER_H

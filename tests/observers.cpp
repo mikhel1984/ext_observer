@@ -17,9 +17,9 @@ static ExternalObserver *observer[ARRAY_LEN] = {0};
 // position to add new element
 static int _nextIndex = 0;
 
-void reset(int ind) 
+void reset(int ind)
 {
-  if(ind >= 0 && ind < _nextIndex) 
+  if(ind >= 0 && ind < _nextIndex)
     observer[ind]->reset();
 }
 
@@ -32,7 +32,7 @@ void freeAll()
   FDynObserver *fd;
   for(int i = 0; i < _nextIndex; i++) {
     switch (observer[i]->type() ) {
-    case ID_MomentumObserver: 
+    case ID_MomentumObserver:
       mo = (MomentumObserver*) observer[i];
       delete mo;
       break;
@@ -56,12 +56,12 @@ void freeAll()
   }
 }
 
-int getExternalTorque(int ind, double* ext, double *q, double *qd, double *tau, double dt) 
+int getExternalTorque(int ind, double* ext, double *q, double *qd, double *tau, double dt)
 {
   if(ind < 0 || ind >= _nextIndex) return ERR_WRONG_INDEX;
   ExternalObserver* ob = observer[ind];
 
-  Vector vext(JOINT_NO), vq(JOINT_NO), vqd(JOINT_NO), vtau(JOINT_NO);
+  VectorJ vext(JOINT_NO), vq(JOINT_NO), vqd(JOINT_NO), vtau(JOINT_NO);
 
   for(int i = 0; i < JOINT_NO; i++) {
     vq(i) = q[i];
@@ -70,7 +70,7 @@ int getExternalTorque(int ind, double* ext, double *q, double *qd, double *tau, 
   }
 
   vext = ob->getExternalTorque(vq,vqd,vtau,dt);
-  
+
   for(int i = 0; i < JOINT_NO; i++) {
     ext[i] = vext(i);
   }
@@ -82,8 +82,8 @@ int configMomentumObserver(int ind, double *k)
 {
   // prepare
   MomentumObserver* ptr;
-  Vector vk(JOINT_NO);
-  for(int i = 0; i < JOINT_NO; i++) 
+  VectorJ vk(JOINT_NO);
+  for(int i = 0; i < JOINT_NO; i++)
     vk(i) = k[i];
 
   if(ind == ADD_NEW) {
@@ -121,7 +121,7 @@ int configDisturbanceObserver(int ind, double sigma, double xeta, double beta)
   // update state
   ptr = (DisturbanceObserver*) observer[ind];
   if(ptr->type() != ID_DisturbanceObserver)
-    return ERR_WRONG_TYPE;  
+    return ERR_WRONG_TYPE;
   ptr->settings(sigma,xeta,beta);
 
   return ind; // ok
@@ -131,7 +131,7 @@ int configSlidingModeObserver(int ind, double *T1, double *S1, double *T2, doubl
 {
   // prepare
   SlidingModeObserver* ptr;
-  Vector vT1(JOINT_NO), vS1(JOINT_NO), vT2(JOINT_NO), vS2(JOINT_NO);
+  VectorJ vT1(JOINT_NO), vS1(JOINT_NO), vT2(JOINT_NO), vS2(JOINT_NO);
   for(int i = 0; i < JOINT_NO; i++) {
     vT1(i) = T1[i];
     vS1(i) = S1[i];
@@ -160,7 +160,7 @@ int configSlidingModeObserver(int ind, double *T1, double *S1, double *T2, doubl
 int configDistKalmanObserver(int ind, double *S, double *H, double *Q, double *R)
 {
   DKalmanObserver* ptr;
-  Matrix mS(JOINT_NO,JOINT_NO), mH(JOINT_NO,JOINT_NO), mQ(2*JOINT_NO,2*JOINT_NO), mR(JOINT_NO,JOINT_NO);
+  MatrixJ mS(JOINT_NO,JOINT_NO), mH(JOINT_NO,JOINT_NO), mQ(2*JOINT_NO,2*JOINT_NO), mR(JOINT_NO,JOINT_NO);
   int k = 0;
   for(int r = 0; r < JOINT_NO; r++) {
     for(int c = 0; c < JOINT_NO; c++,k++) {
@@ -171,7 +171,7 @@ int configDistKalmanObserver(int ind, double *S, double *H, double *Q, double *R
   }
   k = 0;
   for(int r = 0; r < 2*JOINT_NO; r++) {
-    for(int c = 0; c < 2*JOINT_NO; c++,k++) 
+    for(int c = 0; c < 2*JOINT_NO; c++,k++)
       mQ(r,c) = Q[k];
   }
 
