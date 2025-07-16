@@ -13,7 +13,8 @@ External torque observers for a robot manipulator.
 
 **tests** contains some tests.
 
-Integration with **ROS** can be found in the "ros_examples" branch.
+Integration with **ROS** can be found in the "ros_examples" branch. [ext_observer_ros](https://github.com/mikhel1984/ext_observer_ros) is a ROS2 node that uses URDF for kinematic tree description 
+and Orocos for dynamics.
 
 The library was developed for the [research](https://www.frontiersin.org/articles/10.3389/frobt.2020.571574/full?utm_campaign=Artificial%2BIntelligence%2BWeekly&utm_medium=web&utm_source=Artificial_Intelligence_Weekly_189) 
 ```
